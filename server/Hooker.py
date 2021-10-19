@@ -1,11 +1,12 @@
+"""
+Reference: https://0x00sec.org/t/malware-writing-python-malware-part-2-keylogging-with-ctypes-and-setwindowshookexa/11858
+"""
+
 from ctypes import *
 from ctypes.wintypes import DWORD, LPARAM, WPARAM, MSG
 from ctypes import wintypes
 import os
 
-"""
-Reference: https://0x00sec.org/t/malware-writing-python-malware-part-2-keylogging-with-ctypes-and-setwindowshookexa/11858
-"""
 
 user32 = windll.user32
 kernel32 = windll.kernel32

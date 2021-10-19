@@ -13,7 +13,7 @@ class KeyLogger:
             "HOOK": self.hook_keys,
             "UNHOOK": self.unhook_keys,
             "BLOCK": self.block_keys,
-            "UNBLOCK": self.unblock_keys
+            "UNBLOCK": self.unblock_keys,
         }
 
         while True:

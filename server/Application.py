@@ -33,14 +33,14 @@ class Application(Process):
                 stdin=subprocess.PIPE,
             )
         ).split("\\r\\r\\n")
-        processList = [
+        process_list = [
             tuple(x.split())
             for x in proc
             if len(x.split()) == 3 and x.split()[1].isnumeric()
         ]
 
         app_pid = self.get_application()
-        apps = [i for i in processList if i[1] in app_pid]
+        apps = [i for i in process_list if i[1] in app_pid]
         self.server.send_obj(apps)
 
     def kill_application(self):

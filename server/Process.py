@@ -35,12 +35,12 @@ class Process:
                 stdin=subprocess.PIPE,
             )
         ).split("\\r\\r\\n")
-        processList = [
+        process_list = [
             tuple(x.split())
             for x in proc
             if len(x.split()) == 3 and x.split()[1].isnumeric()
         ]
-        self.server.send_obj(processList)
+        self.server.send_obj(process_list)
 
     def kill_process(self):
         while True:
