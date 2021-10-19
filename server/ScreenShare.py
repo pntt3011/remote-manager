@@ -1,5 +1,3 @@
-from Server import Server
-
 import cv2
 import pyautogui
 import numpy as np
@@ -30,14 +28,12 @@ class ScreenShare:
 
         while self.running:
             frame = self.get_frame()
-            _, frame = cv2.imencode(
-                '.jpg', frame, self.encoding_parameters)
+            _, frame = cv2.imencode(".jpg", frame, self.encoding_parameters)
             data = pickle.dumps(frame, 0)
             size = len(data)
 
             try:
-                self.client_socket.sendall(
-                    struct.pack('>L', size) + data)
+                self.client_socket.sendall(struct.pack(">L", size) + data)
             except:
                 self.running = False
 

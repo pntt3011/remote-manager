@@ -6,14 +6,14 @@ MAX_LEN = 4096
 HEADER_SIZE = 8
 
 
-class Server(socket.socket):
+class ServerSocket(socket.socket):
     def __init__(self, *args, **kwargs):
-        super(Server, self).__init__(*args, **kwargs)
+        super(ServerSocket, self).__init__(*args, **kwargs)
         self.client = None
         self.client_addr = None
 
     def accept(self):
-        self.client, self.client_addr = super(Server, self).accept()
+        self.client, self.client_addr = super(ServerSocket, self).accept()
         return self.client_addr
 
     def receive_signal(self):
@@ -56,4 +56,4 @@ class Server(socket.socket):
         assert self.client != None
         self.client.shutdown(socket.SHUT_RDWR)
         self.client.close()
-        super(Server, self).close()
+        super(ServerSocket, self).close()
