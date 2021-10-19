@@ -69,25 +69,26 @@ class ServerApp:
             sysTrayIcon.hover_text = "Connected by " + addr[0]
             sysTrayIcon.refresh_icon()
 
-            dict = {
-                "KEYLOG": self.key_logger.start_listening,  # DONE
-                "SHUTDOWN": self.os.shutdown,  # DONE
-                "LOGOUT": self.os.logout,  # DONE
-                "REGISTRY": self.registry.start_listening,  # DONE
-                "TAKEPIC": self.screen.start_recording,  # DONE
-                "PROCESS": self.process.start_listening,  # DONE
-                "APPLICATION": self.application.start_listening,  # DONE
-                "MAC_ADDRESS": self.network.mac_address,  # DONE
-            }
+            listeners = [
+                self.key_logger.start_listening,  # DONE
+                self.os.start_listening,  # DONE
+                self.registry.start_listening,  # DONE
+                self.screen.start_listening,  # DONE
+                self.process.start_listening,  # DONE
+                self.application.start_listening,  # DONE
+                self.network.start_listening,  # DONE
+            ]
 
             while True:
                 print("MENU:")
                 s = self.server.receive_signal()
 
-                if s in dict:
-                    dict[s]()
-                elif s == "QUIT":
+                if s == "QUIT":
                     break
+
+                for listener in listeners:
+                    if listener(s):
+                        break
 
             sysTrayIcon.hover_text = "Waiting for connection..."
             sysTrayIcon.refresh_icon()

@@ -5,6 +5,15 @@ class Network:
     def __init__(self, server):
         self.server = server
 
+    def start_listening(self, s):
+        dict = {"MAC_ADDRESS": self.mac_address}
+
+        if s in dict:
+            dict[s]()
+            return True
+
+        return False
+
     def mac_address(self):
         print("GET MAC:")
         mac = list(self.get_mac_address())

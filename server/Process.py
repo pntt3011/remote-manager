@@ -10,21 +10,18 @@ class Process:
         self.st_info = subprocess.STARTUPINFO()
         self.st_info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-    def start_listening(self):
+    def start_listening(self, s):
         dict = {
             "XEM": self.list_process,
             "KILL": self.kill_process,
             "START": self.start_process,
         }
 
-        while True:
-            print("PROCESS:")
-            s = self.server.receive_signal()
+        if s in dict:
+            dict[s]()
+            return True
 
-            if s in dict:
-                dict[s]()
-            elif s == "QUIT":
-                break
+        return False
 
     def list_process(self):
         proc = str(

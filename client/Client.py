@@ -162,7 +162,7 @@ class Client:
             messagebox.showerror(message="Chưa kết nối đến server!")
             return
 
-        if not self.send_msg("TAKEPIC"):
+        if not self.send_msg("START_CAPTURE"):
             return
 
         pic = tk.Toplevel(self.root)

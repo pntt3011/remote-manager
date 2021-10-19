@@ -4,29 +4,26 @@ import os
 import sys
 
 
-class Registry():
+class Registry:
     def __init__(self, server):
         self.server = server
         self.st_info = subprocess.STARTUPINFO()
         self.st_info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-    def start_listening(self):
+    def start_listening(self, s):
         dict = {"REG": self.reg_registry, "SEND": self.send_registry}
 
-        while True:
-            print("REGISTRY")
-            s = self.server.receive_signal()
-            if s in dict:
-                dict[s]()
-            elif s == "QUIT":
-                break
+        if s in dict:
+            dict[s]()
+            return True
+
+        return False
 
     def reg_registry(self):
         print("REG_REGISTRY")
 
         file_name = "fileReg.reg"
-        path = os.path.dirname(os.path.realpath(
-            sys.argv[0])) + "\\" + file_name
+        path = os.path.dirname(os.path.realpath(sys.argv[0])) + "\\" + file_name
 
         s = self.server.receive_obj()
 
@@ -73,7 +70,7 @@ class Registry():
             return
 
         key = self.base_registry_key(link)
-        sub_link = link[link.index("\\") + 1:]
+        sub_link = link[link.index("\\") + 1 :]
 
         if key == None:
             s = "Error"
@@ -89,8 +86,7 @@ class Registry():
                 s = self.get_value(key, sub_link, value_name)
 
             elif option == "Set value":
-                s = self.set_value(
-                    key, sub_link, value_name, value, type_value)
+                s = self.set_value(key, sub_link, value_name, value, type_value)
 
             elif option == "Delete value":
                 s = self.delete_value(key, sub_link, value_name)
@@ -111,7 +107,7 @@ class Registry():
         }
 
         if link.index("\\") >= 0:
-            base = link[0: link.index("\\")].upper()
+            base = link[0 : link.index("\\")].upper()
             if base in dict:
                 key = winreg.ConnectRegistry(None, dict[base])
 

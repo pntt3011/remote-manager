@@ -6,6 +6,15 @@ class OS:
         self.st_info = subprocess.STARTUPINFO()
         self.st_info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
+    def start_listening(self, s):
+        dict = {"SHUTDOWN": self.shutdown, "LOGOUT": self.logout}
+
+        if s in dict:
+            dict[s]()
+            return True
+
+        return False
+
     def shutdown(self):
         subprocess.call(
             "shutdown -s",

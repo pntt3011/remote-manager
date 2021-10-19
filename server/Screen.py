@@ -4,17 +4,17 @@ import threading
 
 class Screen:
     def __init__(self, server):
-        self.receiver = ScreenShare('127.0.0.1', 9999)
+        self.receiver = ScreenShare("127.0.0.1", 9999)
         self.server = server
 
-    def start_recording(self):
-        threading.Thread(target=self.receiver.start_stream,
-                         daemon=True).start()
-        while True:
-            print("TAKEPIC:")
-            s = self.server.receive_signal()
+    def start_listening(self, s):
+        dict = {
+            "START_CAPTURE": self.receiver.start_stream,
+            "STOP_CAPTURE": self.receiver.stop_stream,
+        }
 
-            if s == "QUIT":
-                break
+        if s in dict:
+            dict[s]()
+            return True
 
-        self.receiver.stop_stream()
+        return False

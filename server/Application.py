@@ -8,21 +8,18 @@ class Application(Process):
     def __init__(self, *args, **kwargs):
         super(Application, self).__init__(*args, **kwargs)
 
-    def start_listening(self):
+    def start_listening(self, s):
         dict = {
             "XEM": self.list_application,
             "KILL": self.kill_application,
             "START": self.start_process,
         }
 
-        while True:
-            print("APPLICATION:")
-            s = self.server.receive_signal()
+        if s in dict:
+            dict[s]()
+            return True
 
-            if s in dict:
-                dict[s]()
-            elif s == "QUIT":
-                break
+        return False
 
     def list_application(self):
         proc = str(
