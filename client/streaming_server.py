@@ -50,7 +50,7 @@ class StreamingServer:
     """
 
     # TODO: Implement slots functionality
-    def __init__(self, host, port, picture, slots=8, quit_key='q'):
+    def __init__(self, UI_control, host, port, picture, slots=8, quit_key='q'):
         """
         Creates a new instance of StreamingServer
         Parameters
@@ -64,6 +64,7 @@ class StreamingServer:
         quit_key : chr
             key that has to be pressed to close connection (default = 'q')  
         """
+        self.UI_control = UI_control
         self.__host = host
         self.__port = port
         self.__slots = slots
@@ -90,7 +91,7 @@ class StreamingServer:
             print("Server is already running")
         else:
             self.__running = True
-            server_thread = threading.Thread(target=self.__server_listening)
+            server_thread = threading.Thread(target=self.__server_listening, daemon=True)
             server_thread.start()
 
     def __server_listening(self):
@@ -110,7 +111,7 @@ class StreamingServer:
                 self.__used_slots += 1
             self.__block.release()
             thread = threading.Thread(
-                target=self.__client_connection, args=(connection, address,))
+                target=self.__client_connection, args=(connection, address,), daemon=True)
             thread.start()
 
     def stop_server(self):
@@ -137,11 +138,11 @@ class StreamingServer:
         data = b""
 
         while self.__running:
-
             break_loop = False
 
             while len(data) < payload_size:
                 received = connection.recv(4096)
+                
                 if received == b'':
                     connection.close()
                     self.__used_slots -= 1
@@ -173,6 +174,7 @@ class StreamingServer:
                 self.__picture.config(image=img)
                 self.__picture.image = img
             except:
+                self.UI_control.lost_connection_handle()
                 connection.close()
                 self.__used_slots -= 1
                 break

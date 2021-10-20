@@ -82,6 +82,7 @@ class ServerApp:
             while True:
                 print("MENU:")
                 s = self.server.receive_signal()
+                print(s)
 
                 if s == "QUIT":
                     break

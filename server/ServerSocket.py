@@ -19,7 +19,7 @@ class ServerSocket(socket.socket):
     def receive_signal(self):
         assert self.client != None
         try:
-            s = self.client.recv(MAX_LEN).decode("utf8").rstrip()
+            s = self.receive_obj()
             if s == "":
                 s = "QUIT"
 
@@ -31,7 +31,7 @@ class ServerSocket(socket.socket):
 
     def send_signal(self, msg):
         assert self.client != None
-        self.client.sendall(bytes(msg, "utf8"))
+        self.send_obj(msg)
 
     def receive_obj(self):
         assert self.client != None
@@ -40,7 +40,7 @@ class ServerSocket(socket.socket):
         (length,) = unpack(">Q", header)
         length_recv = 0
         while length_recv < length:
-            s = self.client.recv(MAX_LEN)
+            s = self.client.recv(min(MAX_LEN, length-length_recv))
             msg += s
             length_recv += len(s)
         return pickle.loads(msg)

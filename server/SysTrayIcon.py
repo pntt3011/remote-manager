@@ -84,7 +84,7 @@ class SysTrayIcon(object):
         self.notify_id = None
         self.refresh_icon()
 
-        threading.Thread(target=lambda: on_start(self)).start()
+        threading.Thread(target=lambda: on_start(self), daemon=True).start()
         win32gui.PumpMessages()
 
     def _add_ids_to_menu_options(self, menu_options):

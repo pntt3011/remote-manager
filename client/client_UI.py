@@ -1,9 +1,11 @@
+from textwrap import fill
 import tkinter as tk
 from tkinter import PhotoImage, ttk, messagebox
 from typing import Counter
 from PIL import ImageTk, Image
 from cv2 import grabCut, textureFlattening
 from matplotlib import image
+from numpy import exp2, true_divide
 from screen_sharing import ScreenSharing
 from my_client import Client
 from connection import Connection
@@ -50,17 +52,19 @@ class ClientUI(ttk.Frame):
 
     def setup_connection_UI(self):
         self.connection_frame = ttk.LabelFrame(self, text='Connection')
-        self.connection_frame.grid(row=0, column=0, sticky='nsew')
-        self.connection_frame.columnconfigure(index=0, weight=1)
+        self.connection_frame.grid(
+            row=0, column=0, padx=(5, 5), pady=(5, 5), sticky='nsew'
+        )
+        self.connection_frame.columnconfigure(index=0, weight=3)
         self.connection_frame.columnconfigure(index=1, weight=1)
-        self.connection_frame.columnconfigure(index=2, weight=5)
+        self.connection_frame.columnconfigure(index=2, weight=50)
         self.connection_frame.rowconfigure(index=0, weight=1)
         self.connection = Connection(self.client, self.connection_frame, self)
         self.connection.ip_entry.grid(
-            row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew"
+            row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
         self.connection.connect_button.grid(
-            row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew"
+            row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
 
     def connect_failed_handle(self):
@@ -73,8 +77,10 @@ class ClientUI(ttk.Frame):
         self.set_state_widgets('normal')
 
     def lost_connection_handle(self):
-        self.client.close()
-        self.client = None
+        print('cacac')
+        if self.client is not None:
+            self.client.close()
+            self.client = None
         self.set_state_widgets('disabled')
         messagebox.showerror(
             message='Connection to server lost! Please try to connect again.'
@@ -94,13 +100,21 @@ class ClientUI(ttk.Frame):
         # self.notebook_control.add(self.process_control_tab, text='Process control')
 
     def setup_sharing_tab(self):
-        self.screen_sharing = ScreenSharing(self.client, self.screen_sharing_tab, self)
-
         self.screen_sharing_tab.rowconfigure(index=0, weight=1)
         self.screen_sharing_tab.rowconfigure(index=1, weight=10000)
         self.screen_sharing_tab.columnconfigure(index=0, weight=1)
         self.screen_sharing_tab.columnconfigure(index=1, weight=1)
-        self.screen_sharing_tab.columnconfigure(index=2, weight=10)
+        self.screen_sharing_tab.columnconfigure(index=2, weight=100)
+
+        self.screen_frame = ttk.LabelFrame(
+            self.screen_sharing_tab, text='Screen', padding=(5, 5)
+        )
+        self.screen_frame.grid(
+            row=1, column=0, columnspan=3, padx=(5, 70), pady=(5, 5), sticky="nsew"
+        )
+        self.screen_sharing = ScreenSharing(
+            self.client, self.screen_sharing_tab, self.screen_frame, self
+        )
 
         self.screen_sharing.start_button.grid(
             row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
@@ -108,9 +122,9 @@ class ClientUI(ttk.Frame):
         self.screen_sharing.stop_button.grid(
             row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
-        self.screen_sharing.picture.grid(
-            row=1, column=0, columnspan=3, sticky="nsew"
-        )
+
+        self.screen_sharing.picture.pack(fill='both', expand=True)
+
 
     def setup_share_files_tab(self):
         # in Frame self.share_files_tab
@@ -118,13 +132,17 @@ class ClientUI(ttk.Frame):
         pass
 
     def destroy(self):
-        if self.screen_sharing.sender != None:
-            self.screen_sharing.sender.stop_server()
-            self.screen_sharing.sender = None
-        if self.client != None:
-            self.client.close()
-            self.client = None
-        return super().destroy()
+        try:
+            if self.screen_sharing.sender is not None:
+                self.screen_sharing.sender.stop_server()
+                self.screen_sharing.sender = None
+
+            if self.client is not None:
+                self.client.close()
+                self.client = None
+        except Exception as e:
+            print(e)
+        super().destroy()
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -133,7 +151,7 @@ if __name__ == '__main__':
 
     # Set the theme
     root.tk.call("source", "sun-valley.tcl")
-    root.tk.call("set_theme", "dark")
+    root.tk.call("set_theme", "light")
     client_UI = ClientUI(root)
     client_UI.pack(fill="both", expand=True)
 
