@@ -23,7 +23,8 @@ class Registry:
         print("REG_REGISTRY")
 
         file_name = "fileReg.reg"
-        path = os.path.dirname(os.path.realpath(sys.argv[0])) + "\\" + file_name
+        path = os.path.dirname(os.path.realpath(
+            sys.argv[0])) + "\\" + file_name
 
         s = self.server.receive_obj()
 
@@ -42,14 +43,14 @@ class Registry:
 
             if "ERROR" in out:
                 print("Failed")
-                self.server.send_signal("Failed")
+                self.server.send_obj("Failed")
 
             else:
                 print("Success")
-                self.server.send_signal("Success")
+                self.server.send_obj("Success")
 
         except:
-            self.server.send_signal("Failed")
+            self.server.send_obj("Failed")
             print("Failed")
 
         finally:
@@ -66,11 +67,11 @@ class Registry:
         type_value = data[4]
 
         if "\\" not in link:
-            self.server.send_signal("Error")
+            self.server.send_obj("Error")
             return
 
         key = self.base_registry_key(link)
-        sub_link = link[link.index("\\") + 1 :]
+        sub_link = link[link.index("\\") + 1:]
 
         if key == None:
             s = "Error"
@@ -86,7 +87,8 @@ class Registry:
                 s = self.get_value(key, sub_link, value_name)
 
             elif option == "Set value":
-                s = self.set_value(key, sub_link, value_name, value, type_value)
+                s = self.set_value(
+                    key, sub_link, value_name, value, type_value)
 
             elif option == "Delete value":
                 s = self.delete_value(key, sub_link, value_name)
@@ -107,7 +109,7 @@ class Registry:
         }
 
         if link.index("\\") >= 0:
-            base = link[0 : link.index("\\")].upper()
+            base = link[0: link.index("\\")].upper()
             if base in dict:
                 key = winreg.ConnectRegistry(None, dict[base])
 

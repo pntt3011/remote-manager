@@ -5,18 +5,19 @@ from my_client import Client
 from tkinter import font, ttk
 from my_entry import MyEntry
 
+
 class Connection:
     def __init__(self, client, parent, UI_control):
         self.UI_control = UI_control
         self.client = client
         self.parent = parent
         self.ip_entry = MyEntry(
-            self.parent, 'Enter host ip', '', justify='center', font=("-size", 13),
+            self.parent, 'Enter host ip', '', justify='center', font=("Segoe Ui", 13),
         )
         self.connect_button = ttk.Button(parent,
-                                        text='Connect',
-                                        style='Accent.TButton',
-                                        command=self.connect_button_click)
+                                         text='Connect',
+                                         style='Accent.TButton',
+                                         command=self.connect_button_click)
         self.connect_button.bind("<Return>", self.handle_enter)
         self.ip_entry.bind("<Return>", self.handle_enter)
         self.connect_button.focus()
@@ -25,7 +26,7 @@ class Connection:
         self.connect_button_click()
 
     def connect_button_click(self):
-        server_ip = self.ip_entry.get();
+        server_ip = self.ip_entry.get()
         print(server_ip)
         if server_ip == '':
             server_ip = 'localhost'

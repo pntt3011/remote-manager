@@ -3,18 +3,22 @@ import tkinter as tk
 from tkinter import PhotoImage, ttk, messagebox
 from typing import Counter
 from PIL import ImageTk, Image
-from matplotlib import image
-from numpy import exp2, true_divide
+from LocalFrame import LocalFrame
+from RemoteFrame import RemoteFrame
 from screen_sharing import ScreenSharing
 from my_client import Client
 from connection import Connection
 from process_control import ProcessControl
 from socket import socket, AF_INET, SOCK_STREAM
 import os
+from ctypes import windll
+import sys
+
+
 class ClientUI(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
+        self.root = parent
         ttk.Frame.__init__(self, parent, *args, **kwargs)
-        
         self.client = Client(self, AF_INET, SOCK_STREAM)
 
         self.columnconfigure(index=0, weight=1)
@@ -34,7 +38,8 @@ class ClientUI(ttk.Frame):
         # Control tab
         self.control_tab = ttk.Frame(self.notebook)
         self.control_icon = ImageTk.PhotoImage(Image.open(
-            os.path.dirname(os.path.realpath(__file__)) + '/res/control_icon.png'
+            os.path.dirname(os.path.realpath(__file__)) +
+            '/res/control_icon.png'
         ))
         self.notebook.add(
             self.control_tab, text='Control', image=self.control_icon, compound=tk.TOP
@@ -44,14 +49,15 @@ class ClientUI(ttk.Frame):
         # Share files tab
         self.share_files_tab = ttk.Frame(self.notebook)
         self.share_files_icon = ImageTk.PhotoImage(Image.open(
-            os.path.dirname(os.path.realpath(__file__)) + '/res/share_files_icon.png'
+            os.path.dirname(os.path.realpath(__file__)) +
+            '/res/share_files_icon.png'
         ))
         self.notebook.add(
             self.share_files_tab, text='Share files', image=self.share_files_icon, compound=tk.TOP
         )
         self.setup_share_files_tab()
 
-        self.set_state_widgets('disabled');
+        self.set_state_widgets('disabled')
 
     def set_state_widgets(self, state):
         for i in range(0, 2):
@@ -83,6 +89,7 @@ class ClientUI(ttk.Frame):
         self.server_ip = self.connection.ip_entry.get()
         messagebox.showinfo(message='Successfully connect to server.')
         self.set_state_widgets('normal')
+        self.remote_frame.open_path()
 
     def lost_connection_handle(self):
         print('Lost connection')
@@ -97,23 +104,28 @@ class ClientUI(ttk.Frame):
     def setup_control_tab(self):
         # Notebook of control options
         self.notebook_control_style = ttk.Style(self.control_tab)
-        self.notebook_control_style.configure('lefttab.TNotebook', tabposition='wn')
-        self.notebook_control = ttk.Notebook(self.control_tab, style='lefttab.TNotebook')
+        self.notebook_control_style.configure(
+            'lefttab.TNotebook', tabposition='wn')
+        self.notebook_control = ttk.Notebook(
+            self.control_tab, style='lefttab.TNotebook')
         self.notebook_control.pack(fill='both', expand=True)
 
         # Screen sharing tab
         self.screen_sharing_tab = ttk.Frame(self.notebook_control)
-        self.notebook_control.add(self.screen_sharing_tab, text='Screen sharing')
+        self.notebook_control.add(
+            self.screen_sharing_tab, text='Screen sharing')
         self.setup_sharing_tab()
 
         # Application control tab
         self.app_control_tab = ttk.Frame(self.notebook_control)
-        self.notebook_control.add(self.app_control_tab, text='Application control')
+        self.notebook_control.add(
+            self.app_control_tab, text='Application control')
         self.setup_app_control_tab()
 
-        #Process control tab
+        # Process control tab
         self.process_control_tab = ttk.Frame(self.notebook_control)
-        self.notebook_control.add(self.process_control_tab, text='Process control')
+        self.notebook_control.add(
+            self.process_control_tab, text='Process control')
         self.setup_process_control_tab()
 
         # self.process_control_tab = ttk.Frame(self.notebook_control)
@@ -147,17 +159,26 @@ class ClientUI(ttk.Frame):
 
         self.screen_sharing.picture.pack(fill='both', expand=True)
 
-
     def setup_share_files_tab(self):
-        # in Frame self.share_files_tab
-        # Tung add here
+        self.client.set_root_window(self.root)
+
+        self.share_files_tab.grid_rowconfigure(0, weight=1)
+        self.share_files_tab.grid_columnconfigure(0, weight=1)
+        self.share_files_tab.grid_columnconfigure(1, weight=1)
+
+        self.local_frame = LocalFrame(self)
+        self.local_frame.grid(row=0, column=0, padx=10, sticky="nsew")
+
+        self.remote_frame = RemoteFrame(self)
+        self.remote_frame.grid(row=0, column=1, padx=10, sticky="nsew")
         pass
 
     def setup_app_control_tab(self):
         pass
 
     def setup_process_control_tab(self):
-        self.process_control = ProcessControl(self.client, self.process_control_tab)
+        self.process_control = ProcessControl(
+            self.client, self.process_control_tab)
 
         # Setup grid
         self.process_control_tab.rowconfigure(index=0, weight=1)
@@ -167,7 +188,6 @@ class ClientUI(ttk.Frame):
         self.process_control_tab.columnconfigure(index=2, weight=1)
         self.process_control_tab.columnconfigure(index=3, weight=50)
 
-        
         # Put tkinter widgets into grid
         self.process_control.run_frame.grid(
             row=0, column=0, columnspan=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
@@ -188,7 +208,7 @@ class ClientUI(ttk.Frame):
         self.process_control.kill_button.grid(
             row=0, column=2, padx=(5, 5), pady=(32, 16), sticky="nsew"
         )
-        
+
         self.process_control.list_frame.grid(
             row=1, column=0, columnspan=4, pady=(5, 5), sticky="nsew"
         )
@@ -207,23 +227,41 @@ class ClientUI(ttk.Frame):
             print(e)
         super().destroy()
 
+
+def is_admin():
+    try:
+        return windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+
 if __name__ == '__main__':
-    root = tk.Tk()
-    root.state('zoomed')
-    root.title('Client')
 
-    # Set the theme
-    root.tk.call("source", "sun-valley.tcl")
-    root.tk.call("set_theme", "light")
+    if is_admin():
+        root = tk.Tk()
+        root.state('zoomed')
+        root.title('Client')
 
-    client_UI = ClientUI(root)
-    client_UI.pack(fill="both", expand=True)
+        # Set the theme
+        root.tk.call("source", os.path.dirname(
+            os.path.realpath(__file__)) + "/sun-valley.tcl")
+        root.tk.call("set_theme", "light")
 
-    # Set a minsize for the window, and place it in the middle
-    root.update()
-    root.minsize(root.winfo_width(), root.winfo_height())
-    x_cordinate = int((root.winfo_screenwidth() / 2) - (root.winfo_width() / 2))
-    y_cordinate = int((root.winfo_screenheight() / 2) - (root.winfo_height() / 2))
-    root.geometry("+{}+{}".format(x_cordinate, y_cordinate))
+        client_UI = ClientUI(root)
+        client_UI.pack(fill="both", expand=True)
 
-    root.mainloop()
+        # Set a minsize for the window, and place it in the middle
+        root.update()
+        root.minsize(root.winfo_width(), root.winfo_height())
+        x_cordinate = int((root.winfo_screenwidth() / 2) -
+                          (root.winfo_width() / 2))
+        y_cordinate = int((root.winfo_screenheight() / 2) -
+                          (root.winfo_height() / 2))
+        root.geometry("+{}+{}".format(x_cordinate, y_cordinate))
+
+        root.mainloop()
+
+    else:
+        windll.shell32.ShellExecuteW(
+            None, "runas", sys.executable, " ".join(sys.argv), None, 1
+        )

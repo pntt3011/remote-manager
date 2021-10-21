@@ -42,12 +42,12 @@ class Process:
     def kill_process(self):
         # Get running processes
         pids = self.get_process()
-        pid = self.server.receive_signal()
+        pid = self.server.receive_obj()
 
         # Invalid pid
         if pid not in pids:
             print("Invalid process")
-            self.server.send_signal("Invalid process")
+            self.server.send_obj("Invalid process")
             return
 
         # If valid, kill
@@ -58,11 +58,11 @@ class Process:
             handle = win32api.OpenProcess(1, 0, int(pid))
             win32process.TerminateProcess(handle, -1)
             print("Killed:", pid)
-            self.server.send_signal("Killed")
+            self.server.send_obj("Killed")
 
         except:
             print("Error")
-            self.server.send_signal("Error")
+            self.server.send_obj("Error")
 
     def get_process(self):
         res = []
@@ -83,18 +83,18 @@ class Process:
     def start_process(self):
         while True:
             print("START_PROCESS:")
-            s = self.server.receive_signal()
+            s = self.server.receive_obj()
 
             if s == "STARTID":
-                name = self.server.receive_signal() + ".exe"
+                name = self.server.receive_obj() + ".exe"
 
                 try:
                     os.startfile(name)
-                    self.server.send_signal("Process started")
+                    self.server.send_obj("Process started")
                     print("Process started")
 
                 except:
-                    self.server.send_signal("Error")
+                    self.server.send_obj("Error")
                     print("Error")
 
             elif s == "QUIT":

@@ -6,6 +6,7 @@ import pickle
 import struct
 import threading
 
+
 class ScreenShare:
     def __init__(self, server, host, port, x_res=1000, y_res=560):
         self.server = server
@@ -22,7 +23,7 @@ class ScreenShare:
         self.x_res = int(x)
         self.y_res = int(y)
         print(x, y)
-        # self.server.send_signal("SUCCESS")
+        # self.server.send_obj("SUCCESS")
 
     def get_frame(self):
         screen = pyautogui.screenshot()
