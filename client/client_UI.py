@@ -3,14 +3,14 @@ import tkinter as tk
 from tkinter import PhotoImage, ttk, messagebox
 from typing import Counter
 from PIL import ImageTk, Image
-from cv2 import grabCut, textureFlattening
 from matplotlib import image
 from numpy import exp2, true_divide
 from screen_sharing import ScreenSharing
 from my_client import Client
 from connection import Connection
+from process_control import ProcessControl
 from socket import socket, AF_INET, SOCK_STREAM
-
+import os
 class ClientUI(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
@@ -25,20 +25,27 @@ class ClientUI(ttk.Frame):
     def setup_widgets(self):
         self.setup_connection_UI()
 
+        # Widgets frame
         self.widgets_frame = ttk.Frame(self)
         self.widgets_frame.grid(row=1, column=0, sticky='nsew')
         self.notebook = ttk.Notebook(self.widgets_frame)
         self.notebook.pack(fill='both', expand=True)
 
+        # Control tab
         self.control_tab = ttk.Frame(self.notebook)
-        self.control_icon = ImageTk.PhotoImage(Image.open('res/control_icon.png'))
+        self.control_icon = ImageTk.PhotoImage(Image.open(
+            os.path.dirname(os.path.realpath(__file__)) + '/res/control_icon.png'
+        ))
         self.notebook.add(
             self.control_tab, text='Control', image=self.control_icon, compound=tk.TOP
         )
         self.setup_control_tab()
 
+        # Share files tab
         self.share_files_tab = ttk.Frame(self.notebook)
-        self.share_files_icon = ImageTk.PhotoImage(Image.open('res/share_files_icon.png'))
+        self.share_files_icon = ImageTk.PhotoImage(Image.open(
+            os.path.dirname(os.path.realpath(__file__)) + '/res/share_files_icon.png'
+        ))
         self.notebook.add(
             self.share_files_tab, text='Share files', image=self.share_files_icon, compound=tk.TOP
         )
@@ -66,46 +73,61 @@ class ClientUI(ttk.Frame):
         self.connection.connect_button.grid(
             row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
+        # self.connection_frame.focus_set()
 
     def connect_failed_handle(self):
-        messagebox.showerror(message="Can't connect to server!")
+        messagebox.showerror(message="Can't connect to server.")
         self.client = None
 
     def connect_accepted_handle(self):
         self.server_ip = self.connection.ip_entry.get()
-        messagebox.showinfo(message='Successfully connect to server!')
+        messagebox.showinfo(message='Successfully connect to server.')
         self.set_state_widgets('normal')
 
     def lost_connection_handle(self):
-        print('cacac')
+        print('Lost connection')
         if self.client is not None:
             self.client.close()
             self.client = None
         self.set_state_widgets('disabled')
         messagebox.showerror(
-            message='Connection to server lost! Please try to connect again.'
+            message='Connection to server lost. Please try to connect again.'
         )
 
     def setup_control_tab(self):
+        # Notebook of control options
         self.notebook_control_style = ttk.Style(self.control_tab)
         self.notebook_control_style.configure('lefttab.TNotebook', tabposition='wn')
         self.notebook_control = ttk.Notebook(self.control_tab, style='lefttab.TNotebook')
         self.notebook_control.pack(fill='both', expand=True)
 
+        # Screen sharing tab
         self.screen_sharing_tab = ttk.Frame(self.notebook_control)
         self.notebook_control.add(self.screen_sharing_tab, text='Screen sharing')
         self.setup_sharing_tab()
+
+        # Application control tab
+        self.app_control_tab = ttk.Frame(self.notebook_control)
+        self.notebook_control.add(self.app_control_tab, text='Application control')
+        self.setup_app_control_tab()
+
+        #Process control tab
+        self.process_control_tab = ttk.Frame(self.notebook_control)
+        self.notebook_control.add(self.process_control_tab, text='Process control')
+        self.setup_process_control_tab()
 
         # self.process_control_tab = ttk.Frame(self.notebook_control)
         # self.notebook_control.add(self.process_control_tab, text='Process control')
 
     def setup_sharing_tab(self):
+        # Setup grid
         self.screen_sharing_tab.rowconfigure(index=0, weight=1)
         self.screen_sharing_tab.rowconfigure(index=1, weight=10000)
         self.screen_sharing_tab.columnconfigure(index=0, weight=1)
         self.screen_sharing_tab.columnconfigure(index=1, weight=1)
         self.screen_sharing_tab.columnconfigure(index=2, weight=100)
 
+        # Put tkinter widgets into grid
         self.screen_frame = ttk.LabelFrame(
             self.screen_sharing_tab, text='Screen', padding=(5, 5)
         )
@@ -131,6 +153,47 @@ class ClientUI(ttk.Frame):
         # Tung add here
         pass
 
+    def setup_app_control_tab(self):
+        pass
+
+    def setup_process_control_tab(self):
+        self.process_control = ProcessControl(self.client, self.process_control_tab)
+
+        # Setup grid
+        self.process_control_tab.rowconfigure(index=0, weight=1)
+        self.process_control_tab.rowconfigure(index=1, weight=10000)
+        self.process_control_tab.columnconfigure(index=0, weight=4)
+        self.process_control_tab.columnconfigure(index=1, weight=1)
+        self.process_control_tab.columnconfigure(index=2, weight=1)
+        self.process_control_tab.columnconfigure(index=3, weight=50)
+
+        
+        # Put tkinter widgets into grid
+        self.process_control.run_frame.grid(
+            row=0, column=0, columnspan=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.process_control.run_frame.columnconfigure(index=0, weight=3)
+        self.process_control.run_frame.columnconfigure(index=1, weight=1)
+        self.process_control.entry.grid(
+            row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.process_control.run_button.grid(
+            row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+
+        self.process_control.list_button.grid(
+            row=0, column=1, padx=(5, 5), pady=(32, 16), sticky="nsew"
+        )
+
+        self.process_control.kill_button.grid(
+            row=0, column=2, padx=(5, 5), pady=(32, 16), sticky="nsew"
+        )
+        
+        self.process_control.list_frame.grid(
+            row=1, column=0, columnspan=4, pady=(5, 5), sticky="nsew"
+        )
+        self.process_control.list.pack(fill='both', expand=True)
+
     def destroy(self):
         try:
             if self.screen_sharing.sender is not None:
@@ -152,6 +215,7 @@ if __name__ == '__main__':
     # Set the theme
     root.tk.call("source", "sun-valley.tcl")
     root.tk.call("set_theme", "light")
+
     client_UI = ClientUI(root)
     client_UI.pack(fill="both", expand=True)
 

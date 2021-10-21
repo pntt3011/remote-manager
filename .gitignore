@@ -1,2 +1,5 @@
 .vscode
 */__pycache__
+/client/test.py
+/client/test1.py
+/client/OldClient.py

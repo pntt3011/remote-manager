@@ -47,7 +47,6 @@ class ScreenShare:
                 self.running = False
 
     def start_stream(self):
-        print('cac')
         if not self.running:
             self.running = True
             threading.Thread(target=self.client_streaming, daemon=True).start()
