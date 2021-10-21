@@ -10,9 +10,9 @@ class Application(Process):
 
     def start_listening(self, s):
         dict = {
-            "XEM": self.list_application,
-            "KILL": self.kill_application,
-            "START": self.start_process,
+            "XEM_APP": self.list_application,
+            "KILL_APP": self.kill_application,
+            "START_APP": self.start_process,
         }
 
         if s in dict:

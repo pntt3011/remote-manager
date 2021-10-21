@@ -51,7 +51,7 @@ class Client(socket.socket):
         length_recv = 0
         while length_recv < length:
             try:
-                s = self.recv(min(BUFFER_SIZE, length_recv))
+                s = self.recv(min(BUFFER_SIZE, length-length_recv))
             except:
                 self.UI_control.lost_connection_handle()
                 return None

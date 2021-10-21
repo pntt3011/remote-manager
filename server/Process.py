@@ -12,9 +12,9 @@ class Process:
 
     def start_listening(self, s):
         dict = {
-            "XEM": self.list_process,
-            "KILL": self.kill_process,
-            "START": self.start_process,
+            "XEM_PROCESS": self.list_process,
+            "KILL_PROCESS": self.kill_process,
+            "START_PROCESS": self.start_process,
         }
 
         if s in dict:
@@ -40,27 +40,18 @@ class Process:
         self.server.send_obj(process_list)
 
     def kill_process(self):
-        while True:
-            print("KILL_PROCESS:")
-            s = self.server.receive_signal()
+        # Get running processes
+        pids = self.get_process()
+        pid = self.server.receive_signal()
 
-            if s == "KILLID":
+        # Invalid pid
+        if pid not in pids:
+            print("Invalid process")
+            self.server.send_signal("Invalid process")
+            return
 
-                # Get running processes
-                pids = self.get_process()
-                pid = self.server.receive_signal()
-
-                # Invalid pid
-                if pid not in pids:
-                    print("Invalid process")
-                    self.server.send_signal("Invalid process")
-                    continue
-
-                # If valid, kill
-                self.kill_process_pid(pid)
-
-            elif s == "QUIT":
-                break
+        # If valid, kill
+        self.kill_process_pid(pid)
 
     def kill_process_pid(self, pid):
         try:
