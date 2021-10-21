@@ -1,20 +1,19 @@
-from textwrap import fill
 import tkinter as tk
 from tkinter import PhotoImage, ttk, messagebox
-from typing import Counter
 from PIL import ImageTk, Image
-from cv2 import grabCut, textureFlattening
 from matplotlib import image
-from numpy import exp2, true_divide
 from screen_sharing import ScreenSharing
 from my_client import Client
 from connection import Connection
 from socket import socket, AF_INET, SOCK_STREAM
+from ttkbootstrap import Style
+import os
+
 
 class ClientUI(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
-        
+
         self.client = Client(self, AF_INET, SOCK_STREAM)
 
         self.columnconfigure(index=0, weight=1)
@@ -31,20 +30,22 @@ class ClientUI(ttk.Frame):
         self.notebook.pack(fill='both', expand=True)
 
         self.control_tab = ttk.Frame(self.notebook)
-        self.control_icon = ImageTk.PhotoImage(Image.open('res/control_icon.png'))
+        self.control_icon = ImageTk.PhotoImage(Image.open(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'res/control_icon.png')))
         self.notebook.add(
             self.control_tab, text='Control', image=self.control_icon, compound=tk.TOP
         )
         self.setup_control_tab()
 
         self.share_files_tab = ttk.Frame(self.notebook)
-        self.share_files_icon = ImageTk.PhotoImage(Image.open('res/share_files_icon.png'))
+        self.share_files_icon = ImageTk.PhotoImage(Image.open(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'res/share_files_icon.png')))
         self.notebook.add(
             self.share_files_tab, text='Share files', image=self.share_files_icon, compound=tk.TOP
         )
         self.setup_share_files_tab()
 
-        self.set_state_widgets('disabled');
+        self.set_state_widgets('disabled')
 
     def set_state_widgets(self, state):
         for i in range(0, 2):
@@ -88,12 +89,15 @@ class ClientUI(ttk.Frame):
 
     def setup_control_tab(self):
         self.notebook_control_style = ttk.Style(self.control_tab)
-        self.notebook_control_style.configure('lefttab.TNotebook', tabposition='wn')
-        self.notebook_control = ttk.Notebook(self.control_tab, style='lefttab.TNotebook')
+        self.notebook_control_style.configure(
+            'lefttab.TNotebook', tabposition='wn')
+        self.notebook_control = ttk.Notebook(
+            self.control_tab, style='lefttab.TNotebook')
         self.notebook_control.pack(fill='both', expand=True)
 
         self.screen_sharing_tab = ttk.Frame(self.notebook_control)
-        self.notebook_control.add(self.screen_sharing_tab, text='Screen sharing')
+        self.notebook_control.add(
+            self.screen_sharing_tab, text='Screen sharing')
         self.setup_sharing_tab()
 
         # self.process_control_tab = ttk.Frame(self.notebook_control)
@@ -125,7 +129,6 @@ class ClientUI(ttk.Frame):
 
         self.screen_sharing.picture.pack(fill='both', expand=True)
 
-
     def setup_share_files_tab(self):
         # in Frame self.share_files_tab
         # Tung add here
@@ -144,22 +147,26 @@ class ClientUI(ttk.Frame):
             print(e)
         super().destroy()
 
+
 if __name__ == '__main__':
-    root = tk.Tk()
+    style = Style('cosmo')
+    root = style.master
     root.state('zoomed')
     root.title('Client')
 
     # Set the theme
-    root.tk.call("source", "sun-valley.tcl")
-    root.tk.call("set_theme", "light")
+    # root.tk.call("source", "sun-valley.tcl")
+    # root.tk.call("set_theme", "light")
     client_UI = ClientUI(root)
     client_UI.pack(fill="both", expand=True)
 
     # Set a minsize for the window, and place it in the middle
     root.update()
     root.minsize(root.winfo_width(), root.winfo_height())
-    x_cordinate = int((root.winfo_screenwidth() / 2) - (root.winfo_width() / 2))
-    y_cordinate = int((root.winfo_screenheight() / 2) - (root.winfo_height() / 2))
+    x_cordinate = int((root.winfo_screenwidth() / 2) -
+                      (root.winfo_width() / 2))
+    y_cordinate = int((root.winfo_screenheight() / 2) -
+                      (root.winfo_height() / 2))
     root.geometry("+{}+{}".format(x_cordinate, y_cordinate))
 
     root.mainloop()
