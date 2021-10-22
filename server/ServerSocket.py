@@ -6,6 +6,7 @@ import pickle
 import os
 
 MAX_LEN = 8192
+MAX_TRANSFER = 1024 * 1024
 HEADER_SIZE = 8
 
 
@@ -108,7 +109,7 @@ class ServerSocket(socket.socket):
                     receive = 0
                     with open(path, 'wb') as f:
                         while length:
-                            chunk = min(length, MAX_LEN)
+                            chunk = min(length, MAX_TRANSFER)
                             data = clientfile.read(chunk)
                             if not data:
                                 flag = False
@@ -165,6 +166,8 @@ class ServerSocket(socket.socket):
                 if not self.send_file(root, file, rel):
                     return False
 
+            break
+
         return True
 
     def send_file(self, root, file, rel):
@@ -183,7 +186,7 @@ class ServerSocket(socket.socket):
 
                 sent = 0
                 while True:
-                    data = f.read(MAX_LEN)
+                    data = f.read(MAX_TRANSFER)
                     if not data:
                         break
 

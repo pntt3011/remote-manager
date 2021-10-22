@@ -36,7 +36,7 @@ class ScreenSharing:
             if not self.client.send_obj("START_CAPTURE"):
                 return
             self.sender = StreamingServer(
-                self.UI_control, self.UI_control.server_ip, 9696, self.picture
+                self.UI_control, '', 9696, self.picture
             )
         self.sender.start_server()
 

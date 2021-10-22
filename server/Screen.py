@@ -1,11 +1,12 @@
 from ScreenShare import ScreenShare
-import threading
 
 
 class Screen:
     def __init__(self, server):
         self.server = server
-        self.receiver = ScreenShare(self.server, "127.0.0.1", 9696)
+
+    def setup_screen_share(self):
+        self.receiver = ScreenShare(self.server, self.server.client_addr, 9696)
 
     def start_listening(self, s):
         dict = {
@@ -19,3 +20,6 @@ class Screen:
             return True
 
         return False
+
+    def close_screen_share(self):
+        self.receiver.stop_stream()

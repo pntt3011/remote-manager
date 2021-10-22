@@ -72,6 +72,8 @@ class ServerApp:
             sysTrayIcon.hover_text = "Connected by " + addr
             sysTrayIcon.refresh_icon()
 
+            self.screen.setup_screen_share()
+
             listeners = [
                 self.share_file.start_listening,  # DONE
                 self.key_logger.start_listening,  # DONE
@@ -97,14 +99,17 @@ class ServerApp:
 
             sysTrayIcon.hover_text = "Waiting for connection..."
             sysTrayIcon.refresh_icon()
+
+            self.screen.close_screen_share()
             self.key_logger.stop()
             self.start_listening(sysTrayIcon)
 
-        except Exception as e:
+        except:
             self.quit(sysTrayIcon)
 
     def quit(self, SysTrayIcon):
         try:
+            self.screen.close_screen_share()
             self.key_logger.stop()
             self.server.close()
         except:

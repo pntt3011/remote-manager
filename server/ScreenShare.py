@@ -34,8 +34,8 @@ class ScreenShare:
     def client_streaming(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((self.host, self.port))
-        # print(self.host, self.port)
-        # print(self.running)
+        print(self.host, self.port)
+        print(self.running)
         while self.running:
             frame = self.get_frame()
             _, frame = cv2.imencode(".jpg", frame, self.encoding_parameters)
