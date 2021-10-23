@@ -6,7 +6,7 @@ import pickle
 import os
 
 MAX_LEN = 8192
-MAX_TRANSFER = 1024 * 1024
+MAX_TRANSFER = 1024 * 32
 HEADER_SIZE = 8
 
 
@@ -103,6 +103,7 @@ class ServerSocket(socket.socket):
                         self.info.set(f"Receiving {relpath}")
 
                     path = os.path.join(root, relpath)
+                    print(f"Receiving {path}")
                     os.makedirs(os.path.dirname(path), exist_ok=True)
 
                     size = length
