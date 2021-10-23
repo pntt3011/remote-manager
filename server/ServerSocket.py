@@ -6,7 +6,7 @@ import pickle
 import os
 
 MAX_LEN = 8192
-MAX_TRANSFER = 1024 * 32
+MAX_TRANSFER = 1024 * 256
 HEADER_SIZE = 8
 
 
@@ -132,7 +132,7 @@ class ServerSocket(socket.socket):
         self.end_monitor()
         return relpath if not flag else None
 
-    def send_item(self, local_path, remote_path, display_progress=False):
+    def send_item(self, local_paths, remote_path, display_progress=False):
         if not self.start_transfer(remote_path):
             self.transfer_result = "Cannot start transfering"
             return
@@ -145,12 +145,12 @@ class ServerSocket(socket.socket):
         print("Connected")
 
         with self.transfer_receive:
-            root, file = os.path.split(local_path)
-            if os.path.isdir(local_path):
-                self.send_folder(local_path, file)
-
-            else:
-                self.send_file(root, file, '')
+            for local_path in local_paths:
+                root, file = os.path.split(local_path)
+                if os.path.isdir(local_path):
+                    self.send_folder(local_path, file)
+                else:
+                    self.send_file(root, file, '')
 
         self.end_monitor()
         self.end_transfer()

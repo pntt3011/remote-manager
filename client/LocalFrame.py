@@ -63,7 +63,6 @@ class LocalFrame(tk.Frame):
             curr_item = self.files.item(selected[0])
             dir_list = ['File folder', 'Disk Drive', '']
 
-            print("Values", curr_item['values'])
             if curr_item['values'][0] in dir_list:
                 curr_dir = "" if self.last_path == "\\" else self.last_path
                 new_file = curr_item['text'][2:]
@@ -111,10 +110,11 @@ class LocalFrame(tk.Frame):
         iid = self.files.identify_row(event.y)
         if iid:
             self.files.focus(iid)
-            self.files.selection_set(iid)
-
             type, _ = self.files.item(self.files.focus(), 'values')
             if type != '' and type != 'Disk Drive':
+                selected = self.files.selection()
+                if iid not in selected:
+                    self.files.selection_set(iid)
                 self.file_popup.post(event.x_root + 10, event.y_root)
 
         elif self.last_path != '\\':
@@ -126,73 +126,76 @@ class LocalFrame(tk.Frame):
         )
 
     def copy(self):
-        path = self.get_selected_path()
+        paths = self.get_selected_path()
         self.clipboard[0] = self.flag
-        self.clipboard[1] = path
+        self.clipboard[1] = paths
 
     def paste(self):
-        dst = self.get_selected_path()
+        dst = self.get_selected_path()[-1]
         if os.path.isfile(dst):
             dst = self.last_path
 
-        src = self.clipboard[1]
+        srcs = self.clipboard[1]
         if self.flag == self.clipboard[0]:
             try:
-                _, name = os.path.split(src)
-                full_dst = os.path.join(dst, name)
+                for src in srcs:
+                    _, name = os.path.split(src)
+                    full_dst = os.path.join(dst, name)
 
-                if os.path.isfile(src):
-                    shutil.copyfile(src, full_dst)
-                else:
-                    shutil.copytree(src, full_dst)
+                    if os.path.isfile(src):
+                        shutil.copyfile(src, full_dst)
+                    else:
+                        shutil.copytree(src, full_dst)
 
                 messagebox.showinfo(
-                    "Success", f"Copy {src} to {dst} successfully.")
+                    "Success", f"Copy {len(srcs)} items to {dst} successfully.")
 
             except Exception as e:
                 messagebox.showerror("Error", e)
 
         else:
-            self.send_over(src, dst)
+            self.send_over(srcs, dst)
 
         self.open_path()
 
     def delete_item(self):
-        path = self.get_selected_path()
+        paths = self.get_selected_path()
         try:
-            if os.path.isdir(path):
-                answer = messagebox.askyesno(title='Confirmation',
-                                             message='Are you sure that you want to delete {}?'.format(path))
-                if answer:
-                    shutil.rmtree(path)
+            answer = messagebox.askyesno(title='Confirmation',
+                                         message='Are you sure that you want to delete {} items?'.format(len(paths)))
+            if answer:
+                for path in paths:
+                    if os.path.isdir(path):
+                        shutil.rmtree(path)
 
-            elif os.path.isfile(path):
-                answer = messagebox.askyesno(title='Confirmation',
-                                             message='Are you sure that you want to delete {}?'.format(path))
-                if answer:
-                    os.remove(path)
+                    elif os.path.isfile(path):
+                        os.remove(path)
 
-            self.open_path()
-
-        except:
+        except Exception as e:
             messagebox.showerror(
-                "Delete Error", "Cannot delete this file/folder.")
+                "Error", e)
+
+        finally:
+            self.open_path()
 
     def get_selected_path(self):
         selected = self.files.selection()
-        if len(selected) > 0:
-            curr_item = self.files.item(selected[0])
+        result = []
+
+        for i in selected:
+            curr_item = self.files.item(i)
             curr_dir = "" if self.last_path == "\\" else self.last_path
             selected_file = curr_item['text'][2:]
 
-            if selected_file != "..":
-                selected_path = os.path.join(curr_dir, selected_file)
-                return selected_path
+            if selected_file == "..":
+                continue
 
-            return self.last_path
+            result.append(os.path.join(curr_dir, selected_file))
 
-        else:
-            return self.last_path
+        if len(result) == 0:
+            result.append(self.last_path)
+
+        return result
 
     def add_scrollbar_to_widget(self, widget, row=0, column=0):
         scroll_y = ttk.Scrollbar(self, orient=VERTICAL)
@@ -320,12 +323,12 @@ class LocalFrame(tk.Frame):
         self.path.delete(0, 'end')
         self.path.insert(0, s)
 
-    def send_over(self, path, local_path):
-        self.client.send_obj(["SEND", path, local_path])
+    def send_over(self, paths, local_path):
+        self.client.send_obj(["SEND", paths, local_path])
         s = self.client.receive_obj()
         if s[0] == "RECEIVE":
-            s = self.client.receive_item(s[1], True)
-            if s is None:
+            recv = self.client.receive_item(s[1], True)
+            if recv is None:
                 messagebox.showinfo(
                     "Complete", "File transferred successfully.")
 

@@ -93,38 +93,39 @@ def insert_file(dict, root, filename, ns):
         })
 
 
-def copy_file(src, dst):
-    _, name = os.path.split(src)
-    full_dst = os.path.join(dst, name)
-    print(src)
-    print(dst)
-    print(full_dst)
+def copy_file(srcs, dst):
     try:
-        if os.path.isfile(src):
-            shutil.copyfile(src, full_dst)
-        else:
-            shutil.copytree(src, full_dst)
+        for src in srcs:
+            _, name = os.path.split(src)
+            full_dst = os.path.join(dst, name)
 
-        return True
+            if os.path.isfile(src):
+                shutil.copyfile(src, full_dst)
+            else:
+                shutil.copytree(src, full_dst)
 
-    except:
-        return False
+        return "SUCCESS"
+
+    except Exception as e:
+        return str(e)
 
 
-def delete_path(path):
+def delete_path(paths):
     try:
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-            return True
+        for path in paths:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
 
-        elif os.path.isfile(path):
-            os.remove(path)
-            return True
+            elif os.path.isfile(path):
+                os.remove(path)
 
-        return False
+            else:
+                return f"Invalid filename {path}"
 
-    except:
-        return False
+        return "SUCCESS"
+
+    except Exception as e:
+        return str(e)
 
 
 class ShareFile:
@@ -140,11 +141,8 @@ class ShareFile:
 
             elif s[0] == "DELETE":
                 path = s[1]
-                if delete_path(path):
-                    self.server.send_obj(["SUCCESS"])
-
-                else:
-                    self.server.send_obj(["FAIL"])
+                s = delete_path(path)
+                self.server.send_obj([s])
 
             elif s[0] == "RECEIVE":
                 s = self.server.receive_item(s[1])
@@ -159,11 +157,7 @@ class ShareFile:
 
             elif s[0] == "COPY":
                 s = copy_file(s[1], s[2])
-                if s:
-                    self.server.send_obj(["SUCCESS"])
-
-                else:
-                    self.server.send_obj(["FAIL"])
+                self.server.send_obj([s])
 
             else:
                 return False
