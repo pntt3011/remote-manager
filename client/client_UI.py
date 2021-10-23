@@ -105,7 +105,8 @@ class ClientUI(ttk.Frame):
         # Notebook of control options
         self.notebook_control_style = ttk.Style(self.control_tab)
         self.notebook_control_style.configure(
-            'lefttab.TNotebook', tabposition='wn')
+            'lefttab.TNotebook',
+            tabposition='wn')
         self.notebook_control = ttk.Notebook(
             self.control_tab, style='lefttab.TNotebook')
         self.notebook_control.pack(fill='both', expand=True)
@@ -113,7 +114,7 @@ class ClientUI(ttk.Frame):
         # Screen sharing tab
         self.screen_sharing_tab = ttk.Frame(self.notebook_control)
         self.notebook_control.add(
-            self.screen_sharing_tab, text='Screen sharing')
+            self.screen_sharing_tab, text='Screen capturing')
         self.setup_sharing_tab()
 
         # Application control tab
@@ -166,12 +167,13 @@ class ClientUI(ttk.Frame):
         self.share_files_tab.grid_columnconfigure(0, weight=1)
         self.share_files_tab.grid_columnconfigure(1, weight=1)
 
-        self.local_frame = LocalFrame(self)
+        self.clipboard = [None] * 2
+
+        self.local_frame = LocalFrame(self, self.clipboard)
         self.local_frame.grid(row=0, column=0, padx=10, sticky="nsew")
 
-        self.remote_frame = RemoteFrame(self)
+        self.remote_frame = RemoteFrame(self, self.clipboard)
         self.remote_frame.grid(row=0, column=1, padx=10, sticky="nsew")
-        pass
 
     def setup_app_control_tab(self):
         pass
@@ -237,7 +239,7 @@ def is_admin():
 
 if __name__ == '__main__':
 
-    if is_admin():
+    if True:  # is_admin():
         root = tk.Tk()
         root.state('zoomed')
         root.title('Client')

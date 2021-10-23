@@ -28,7 +28,7 @@ def get_files(path):
     else:
         result['files'].append({
             'name': '..',
-            'type': 'File folder',
+            'type': '',
             'size': ''
         })
 
@@ -93,6 +93,24 @@ def insert_file(dict, root, filename, ns):
         })
 
 
+def copy_file(src, dst):
+    _, name = os.path.split(src)
+    full_dst = os.path.join(dst, name)
+    print(src)
+    print(dst)
+    print(full_dst)
+    try:
+        if os.path.isfile(src):
+            shutil.copyfile(src, full_dst)
+        else:
+            shutil.copytree(src, full_dst)
+
+        return True
+
+    except:
+        return False
+
+
 def delete_path(path):
     try:
         if os.path.isdir(path):
@@ -138,6 +156,14 @@ class ShareFile:
 
             elif s[0] == "SEND":
                 self.server.send_item(s[1], s[2])
+
+            elif s[0] == "COPY":
+                s = copy_file(s[1], s[2])
+                if s:
+                    self.server.send_obj(["SUCCESS"])
+
+                else:
+                    self.server.send_obj(["FAIL"])
 
             else:
                 return False

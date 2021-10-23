@@ -3,18 +3,20 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from ctypes import windll
+import shutil
 import tkinter as tk
 import os
 import win32com.client
 import psutil
-import shutil
 
 
 class LocalFrame(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, clipboard):
         super(LocalFrame, self).__init__(parent.share_files_tab)
         self.parent = parent
         self.client = parent.client
+        self.clipboard = clipboard
+        self.flag = True
         self.setup_components()
         self.setup_files()
 
@@ -28,7 +30,7 @@ class LocalFrame(tk.Frame):
         self.add_scrollbar_to_widget(self.files, row=1, column=0)
 
     def add_path(self):
-        field = ttk.Frame(self)
+        field = tk.Frame(self)
         field.grid(row=0, column=0, sticky="ew")
 
         label = ttk.Label(field, text="Local path: ")
@@ -52,12 +54,16 @@ class LocalFrame(tk.Frame):
         self.files.bind('<Double-Button-1>',
                         lambda _: self.on_click_item())
 
-        self.add_popup_menu()
+        self.setup_popup_menu()
+        self.files.bind("<Button-3>", self.popup)
 
     def on_click_item(self):
         curr_item = self.files.item(self.files.focus())
 
-        if curr_item['values'][0] == 'File folder' or curr_item['values'][0] == 'Disk Drive':
+        dir_list = ['File folder', 'Disk Drive', '']
+
+        print("Values", curr_item['values'])
+        if curr_item['values'][0] in dir_list:
             curr_dir = "" if self.last_path == "\\" else self.last_path
             new_file = curr_item['text'][2:]
 
@@ -72,30 +78,83 @@ class LocalFrame(tk.Frame):
             self.set_path(new_path)
             self.open_path()
 
-    def add_popup_menu(self):
-        self.popup_menu = tk.Menu(self, tearoff=0)
-        self.popup_menu.add_command(label="Open file location",
-                                    command=self.open_in_explorer)
-        self.popup_menu.add_command(label="Send to Remote",
-                                    command=self.send_to_remote)
-        self.popup_menu.add_command(label="Delete",
-                                    command=self.delete_item)
+    def setup_popup_menu(self):
+        self.setup_file_popup()
+        self.setup_empty_popup()
 
-        self.files.bind("<Button-3>", self.popup)
+    def setup_file_popup(self):
+        self.file_popup = tk.Menu(self, tearoff=0)
+        self.file_popup.add_command(label="Open location",
+                                    command=self.open_in_explorer)
+        self.file_popup.add_command(label="Copy",
+                                    command=self.copy)
+        self.file_popup.add_command(label="Paste",
+                                    command=self.paste)
+        self.file_popup.add_command(label="Delete",
+                                    command=self.delete_item)
+        self.file_popup.entryconfig("Paste", state="disabled")
+
+    def setup_empty_popup(self):
+        self.empty_popup = tk.Menu(self, tearoff=0)
+        self.empty_popup.add_command(label="Open location",
+                                     command=self.open_in_explorer)
+        self.empty_popup.add_command(label="Paste",
+                                     command=self.paste)
+        self.empty_popup.entryconfig("Paste", state="disabled")
 
     def popup(self, event):
+        if self.clipboard[0] is not None:
+            self.file_popup.entryconfig("Paste", state="active")
+            self.empty_popup.entryconfig("Paste", state="active")
+
         iid = self.files.identify_row(event.y)
         if iid:
             self.files.focus(iid)
             self.files.selection_set(iid)
-            self.popup_menu.post(event.x_root + 10, event.y_root)
-        else:
-            pass
+
+            type, _ = self.files.item(self.files.focus(), 'values')
+            if type != '' and type != 'Disk Drive':
+                self.file_popup.post(event.x_root + 10, event.y_root)
+
+        elif self.last_path != '\\':
+            self.empty_popup.post(event.x_root + 10, event.y_root)
 
     def open_in_explorer(self):
         windll.shell32.ShellExecuteW(
             None, 'open', 'explorer.exe', self.last_path, None, 1
         )
+
+    def copy(self):
+        path = self.get_selected_path()
+        self.clipboard[0] = self.flag
+        self.clipboard[1] = path
+
+    def paste(self):
+        dst = self.get_selected_path()
+        if os.path.isfile(dst):
+            dst = self.last_path
+
+        src = self.clipboard[1]
+        if self.flag == self.clipboard[0]:
+            try:
+                _, name = os.path.split(src)
+                full_dst = os.path.join(dst, name)
+
+                if os.path.isfile(src):
+                    shutil.copyfile(src, full_dst)
+                else:
+                    shutil.copytree(src, full_dst)
+
+                messagebox.showinfo(
+                    "Success", f"Copy {src} to {dst} successfully.")
+
+            except Exception as e:
+                messagebox.showerror("Error", e)
+
+        else:
+            self.send_over(src, dst)
+
+        self.open_path()
 
     def delete_item(self):
         path = self.get_selected_path()
@@ -119,18 +178,20 @@ class LocalFrame(tk.Frame):
                 "Delete Error", "Cannot delete this file/folder.")
 
     def get_selected_path(self):
-        curr_item = self.files.item(self.files.focus())
-        curr_dir = "" if self.last_path == "\\" else self.last_path
-        selected_file = curr_item['text'][2:]
+        selected = self.files.selection()
+        if len(selected) > 0:
+            curr_item = self.files.item(selected[0])
+            curr_dir = "" if self.last_path == "\\" else self.last_path
+            selected_file = curr_item['text'][2:]
 
-        if selected_file != "..":
-            selected_path = os.path.join(curr_dir, selected_file)
-            return selected_path
-        return None
+            if selected_file != "..":
+                selected_path = os.path.join(curr_dir, selected_file)
+                return selected_path
 
-    def send_to_remote(self):
-        path = self.get_selected_path()
-        self.parent.remote_frame.send_over(path)
+            return self.last_path
+
+        else:
+            return self.last_path
 
     def add_scrollbar_to_widget(self, widget, row=0, column=0):
         scroll_y = ttk.Scrollbar(self, orient=VERTICAL)
@@ -192,7 +253,12 @@ class LocalFrame(tk.Frame):
                 )
 
         else:
-            self.insert_folder(None, '..')
+            self.files.insert(
+                parent='', index='end',
+                text='  ..',
+                value=('', ''),
+                image=self.folder_icon
+            )
 
             for root, dirs, files in os.walk(path):
                 for dir in dirs:
@@ -253,8 +319,7 @@ class LocalFrame(tk.Frame):
         self.path.delete(0, 'end')
         self.path.insert(0, s)
 
-    def send_over(self, path):
-        local_path = self.last_path
+    def send_over(self, path, local_path):
         self.client.send_obj(["SEND", path, local_path])
         s = self.client.receive_obj()
         if s[0] == "RECEIVE":
@@ -270,5 +335,3 @@ class LocalFrame(tk.Frame):
         else:
             messagebox.showerror(
                 "Error", "Cannot start transferring")
-
-        self.open_path()

@@ -6,8 +6,9 @@ import os
 
 
 class RemoteFrame(LocalFrame):
-    def __init__(self, parent):
-        super(RemoteFrame, self).__init__(parent)
+    def __init__(self, parent, clipboard):
+        super(RemoteFrame, self).__init__(parent, clipboard)
+        self.flag = False
 
     def reset_path(self):
         self.set_path('\\')
@@ -37,7 +38,7 @@ class RemoteFrame(LocalFrame):
             size = item['size']
             image = self.file_icon
 
-            if type == 'File folder':
+            if type == 'File folder' or name == '..':
                 image = self.folder_icon
 
             elif type == 'Disk Drive':
@@ -52,14 +53,42 @@ class RemoteFrame(LocalFrame):
 
         self.files.yview_moveto(0)
 
-    def add_popup_menu(self):
-        self.popup_menu = tk.Menu(self, tearoff=0)
-        self.popup_menu.add_command(label="Send to Local",
-                                    command=self.send_to_local)
-        self.popup_menu.add_command(label="Delete",
+    def setup_file_popup(self):
+        self.file_popup = tk.Menu(self, tearoff=0)
+        self.file_popup.add_command(label="Copy",
+                                    command=self.copy)
+        self.file_popup.add_command(label="Paste",
+                                    command=self.paste)
+        self.file_popup.add_command(label="Delete",
                                     command=self.delete_item)
+        self.file_popup.entryconfig("Paste", state="disabled")
 
-        self.files.bind("<Button-3>", self.popup)
+    def setup_empty_popup(self):
+        self.empty_popup = tk.Menu(self, tearoff=0)
+        self.empty_popup.add_command(label="Paste",
+                                     command=self.paste)
+        self.empty_popup.entryconfig("Paste", state="disabled")
+
+    def paste(self):
+        dst = self.get_selected_path()
+        if os.path.isfile(dst):
+            dst = self.last_path
+
+        if self.flag == self.clipboard[0]:
+            src = self.clipboard[1]
+            self.client.send_obj(["COPY", src, dst])
+            s = self.client.receive_obj()
+
+            if s[0] == "SUCCESS":
+                messagebox.showinfo(
+                    "Success", f"Copy {src} to {dst} successfully.")
+            else:
+                messagebox.showerror("Error", f"Fail to copy {src} to {dst}.")
+
+        else:
+            self.send_over(self.clipboard[1], dst)
+
+        self.open_path()
 
     def delete_item(self):
         path = self.get_selected_path()
@@ -78,16 +107,11 @@ class RemoteFrame(LocalFrame):
             messagebox.showerror(
                 "Delete Error", "Cannot delete this file/folder.")
 
-    def send_to_local(self):
-        path = self.get_selected_path()
-        self.parent.local_frame.send_over(path)
-
-    def send_over(self, path):
+    def send_over(self, path, remote_path):
         if not os.path.exists(path):
             messagebox.showerror(
                 "Error", "Error while transferring {}".format(path))
 
-        remote_path = self.last_path
         self.client.send_item(path, remote_path, True)
 
         trans_result = self.client.transfer_result
@@ -105,5 +129,3 @@ class RemoteFrame(LocalFrame):
         else:
             messagebox.showerror(
                 "Error", trans_result)
-
-        self.open_path()
