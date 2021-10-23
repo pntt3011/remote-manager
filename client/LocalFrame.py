@@ -58,25 +58,26 @@ class LocalFrame(tk.Frame):
         self.files.bind("<Button-3>", self.popup)
 
     def on_click_item(self):
-        curr_item = self.files.item(self.files.focus())
+        selected = self.files.selection()
+        if len(selected) > 0:
+            curr_item = self.files.item(selected[0])
+            dir_list = ['File folder', 'Disk Drive', '']
 
-        dir_list = ['File folder', 'Disk Drive', '']
+            print("Values", curr_item['values'])
+            if curr_item['values'][0] in dir_list:
+                curr_dir = "" if self.last_path == "\\" else self.last_path
+                new_file = curr_item['text'][2:]
 
-        print("Values", curr_item['values'])
-        if curr_item['values'][0] in dir_list:
-            curr_dir = "" if self.last_path == "\\" else self.last_path
-            new_file = curr_item['text'][2:]
+                if new_file != "..":
+                    new_path = os.path.join(curr_dir, new_file)
 
-            if new_file != "..":
-                new_path = os.path.join(curr_dir, new_file)
+                else:
+                    new_path, fn = os.path.split(curr_dir)
+                    if fn == "":
+                        new_path = "\\"
 
-            else:
-                new_path, fn = os.path.split(curr_dir)
-                if fn == "":
-                    new_path = "\\"
-
-            self.set_path(new_path)
-            self.open_path()
+                self.set_path(new_path)
+                self.open_path()
 
     def setup_popup_menu(self):
         self.setup_file_popup()
