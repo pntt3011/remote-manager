@@ -456,18 +456,6 @@ namespace eval ttk::theme::sun-valley-light {
         ttk::style element create Treeview.field image $images(card) \
             -border 5
 
-        ttk::style element create Treeheading.cell \
-            image [list $images(treeheading-rest) \
-                pressed $images(treeheading-pressed) \
-                active $images(treeheading-hover)
-            ] -border 5 -padding 15 -sticky nsew
-        
-        ttk::style element create Treeitem.indicator \
-            image [list $images(arrow-right) \
-                user2 $images(empty) \
-                user1 $images(arrow-down) \
-            ] -width 26 -sticky {}
-
         ttk::style configure Treeview -foregound #1a1a1a -background $colors(-bg) -rowheight [expr {[font metrics font -linespace] + 2}]
         ttk::style map Treeview \
             -background [list selected #f0f0f0] \
