@@ -84,14 +84,16 @@ class LocalFrame(tk.Frame):
 
     def setup_file_popup(self):
         self.file_popup = tk.Menu(self, tearoff=0)
-        self.file_popup.add_command(label="Open location",
-                                    command=self.open_in_explorer)
+        self.file_popup.add_command(label="Open",
+                                    command=self.open)
         self.file_popup.add_command(label="Copy",
                                     command=self.copy)
         self.file_popup.add_command(label="Paste",
                                     command=self.paste)
         self.file_popup.add_command(label="Delete",
                                     command=self.delete_item)
+        self.file_popup.add_command(label="Open location",
+                                    command=self.open_in_explorer)
         self.file_popup.entryconfig("Paste", state="disabled")
 
     def setup_empty_popup(self):
@@ -119,6 +121,15 @@ class LocalFrame(tk.Frame):
 
         elif self.last_path != '\\':
             self.empty_popup.post(event.x_root + 10, event.y_root)
+
+    def open(self):
+        paths = self.get_selected_path()
+        try:
+            for path in paths:
+                os.startfile(path)
+
+        except Exception as e:
+            messagebox.showerror("Error", e)
 
     def open_in_explorer(self):
         windll.shell32.ShellExecuteW(
