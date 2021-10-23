@@ -91,7 +91,8 @@ class StreamingServer:
             print("Server is already running")
         else:
             self.__running = True
-            server_thread = threading.Thread(target=self.__server_listening, daemon=True)
+            server_thread = threading.Thread(
+                target=self.__server_listening, daemon=True)
             server_thread.start()
 
     def __server_listening(self):
@@ -122,7 +123,12 @@ class StreamingServer:
             self.__running = False
             closing_connection = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
-            closing_connection.connect((self.__host, self.__port))
+
+            if self.__host == '':
+                closing_connection.connect(('localhost', self.__port))
+            else:
+                closing_connection.connect((self.__host, self.__port))
+
             closing_connection.close()
             self.__block.acquire()
             self.__server_socket.close()
@@ -142,7 +148,7 @@ class StreamingServer:
 
             while len(data) < payload_size:
                 received = connection.recv(4096)
-                
+
                 if received == b'':
                     connection.close()
                     self.__used_slots -= 1
