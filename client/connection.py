@@ -5,11 +5,14 @@ from my_client import Client
 from tkinter import font, ttk
 from my_entry import MyEntry
 
+IO_PORT = 5656
+
 
 class Connection:
-    def __init__(self, client, parent, UI_control):
+    def __init__(self, client, client_io, parent, UI_control):
         self.UI_control = UI_control
         self.client = client
+        self.client_io = client_io
         self.parent = parent
         self.ip_entry = MyEntry(
             self.parent, 'Enter host ip', '', justify='center', font=("Segoe Ui", 13),
@@ -32,8 +35,10 @@ class Connection:
             server_ip = 'localhost'
         try:
             self.client.connect(server_ip)
+            self.client_io.connect((server_ip, IO_PORT))
             self.UI_control.connect_accepted_handle()
             return True
-        except:
+        except Exception as e:
+            print(e)
             self.UI_control.connect_failed_handle()
             return False

@@ -1,5 +1,11 @@
 from pynput.keyboard import Key, Controller
+from ServerSocket import ServerSocket
 import pyautogui
+import socket
+
+HOST = ""
+PORT = 5656
+ADDR = (HOST, PORT)
 
 key_map = {
     'Escape': Key.esc,
@@ -133,34 +139,49 @@ key_map = {
 }
 
 
-class IO:
-    def __init__(self, server):
+class ServerIO:
+    def __init__(self):
         self.keyboard = Controller()
-        self.server = server
         self.w, self.h = pyautogui.size()
+        self.dict = {
+            "MOUSE_MOVE": self.mouse_move,
+            "KEY_PRESS": lambda s: self.keyboard.press(key_map[s]),
+            "KEY_RELEASE": lambda s: self.keyboard.release(key_map[s]),
+            "MOUSE_UP": lambda s: pyautogui.mouseUp(button=s),
+            "MOUSE_DOWN": lambda s: pyautogui.mouseDown(button=s)
+        }
+        self.open_server()
+
+    def open_server(self):
+        self.server = ServerSocket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind(ADDR)
+        self.server.listen(1)
+
+    def start_listening(self):
+        try:
+            self.server.accept()
+            print("Accepted")
+        finally:
+            self.flag = True
+
+            while self.flag:
+                s = self.server.receive_obj()
+
+                if s == "QUIT":
+                    break
+
+                if s[0] in self.dict:
+                    print(s[0])
+                    self.dict[s[0]](s[1])
 
     def mouse_move(self, s):
         x = int(float(s[0]) * self.w)
         y = int(float(s[1]) * self.h)
         pyautogui.moveTo(x, y)
 
-    def start_listening(self, s):
-        dict = {
-            "KEY_PRESS": lambda s: self.keyboard.press(key_map[s]),
-            "KEY_RELEASE": lambda s: self.keyboard.release(key_map[s]),
-            "MOUSE_MOVE": self.mouse_move,
-            "MOUSE_UP": lambda s: pyautogui.mouseUp(button=s),
-            "MOUSE_DOWN": lambda s: pyautogui.mouseDown(button=s)
-        }
+    def stop(self):
+        self.flag = False
 
-        if type(s) == type([]) and s[0] in dict:
-            try:
-                dict[s[0]](s[1])
-
-            except Exception as e:
-                print(e)
-
-            finally:
-                return True
-
-        return False
+    def close(self):
+        self.stop()
+        self.server.close()

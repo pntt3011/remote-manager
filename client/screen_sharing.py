@@ -6,8 +6,9 @@ import time
 
 
 class ScreenSharing:
-    def __init__(self, client, parent, screen_frame, UI_control):
+    def __init__(self, client, client_io, parent, screen_frame, UI_control):
         self.client = client
+        self.client_io = client_io
         self.parent = parent
         self.screen_frame = screen_frame
         self.UI_control = UI_control
@@ -20,10 +21,16 @@ class ScreenSharing:
                                       text='Stop capturing',
                                       style='Accent.TButton',
                                       command=self.stop_button_click,)
+        self.control_button = ttk.Button(parent,
+                                         text='Start controlling',
+                                         style='Accent.TButton',
+                                         command=self.control_button_click,)
         self.picture = ttk.Label(self.screen_frame)
+        self.control_flag = False
         self.sender = None
         self.x_res = None
         self.y_res = None
+        self.clock = time.time()
 
         self.setup_remote_control()
 
@@ -40,26 +47,28 @@ class ScreenSharing:
         self.picture.bind("<Motion>", self.motion)
 
     def keydown(self, event):
-        if self.sender is not None:
-            self.client.send_obj(["KEY_PRESS", event.keysym])
+        if self.control_flag and self.sender is not None:
+            self.client_io.send_obj(["KEY_PRESS", event.keysym])
 
     def keyup(self, event):
-        if self.sender is not None:
-            self.client.send_obj(["KEY_RELEASE", event.keysym])
+        if self.control_flag and self.sender is not None:
+            self.client_io.send_obj(["KEY_RELEASE", event.keysym])
 
     def mousedown(self, m):
-        if self.sender is not None:
-            self.client.send_obj(["MOUSE_DOWN", m])
+        if self.control_flag and self.sender is not None:
+            self.client_io.send_obj(["MOUSE_DOWN", m])
 
     def mouseup(self, m):
-        if self.sender is not None:
-            self.client.send_obj(["MOUSE_UP", m])
+        if self.control_flag and self.sender is not None:
+            self.client_io.send_obj(["MOUSE_UP", m])
 
     def motion(self, event):
-        if self.sender is not None:
-            x = repr(min(event.x / self.x_res, 1.))
-            y = repr(min(event.y / self.y_res, 1.))
-            self.client.send_obj(["MOUSE_MOVE", [x, y]])
+        if self.control_flag and self.sender is not None:
+            if 10 * (time.time() - self.clock) >= 1:
+                x = repr(min(event.x / self.x_res, 1.))
+                y = repr(min(event.y / self.y_res, 1.))
+                self.client_io.send_obj(["MOUSE_MOVE", [x, y]])
+                self.clock = time.time()
 
     def start_button_click(self):
         self.picture.focus_set()
@@ -87,3 +96,10 @@ class ScreenSharing:
         if self.sender is not None:
             self.sender.stop_server()
             self.sender = None
+
+    def control_button_click(self):
+        self.control_flag = not self.control_flag
+        if str(self.control_button.cget("text")) == "Start controlling" and self.sender is not None:
+            self.control_button.configure(text="Stop controlling")
+        else:
+            self.control_button.configure(text="Start controlling")

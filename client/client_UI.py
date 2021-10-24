@@ -1,7 +1,5 @@
-from textwrap import fill
 import tkinter as tk
-from tkinter import PhotoImage, ttk, messagebox
-from typing import Counter
+from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 from LocalFrame import LocalFrame
 from RemoteFrame import RemoteFrame
@@ -10,6 +8,7 @@ from my_client import Client
 from connection import Connection
 from process_control import ProcessControl
 from socket import socket, AF_INET, SOCK_STREAM
+from BaseSocket import BaseSocket
 import os
 from ctypes import windll
 import sys
@@ -20,6 +19,7 @@ class ClientUI(ttk.Frame):
         self.root = parent
         ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.client = Client(self, AF_INET, SOCK_STREAM)
+        self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
 
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=0, weight=1)
@@ -72,7 +72,8 @@ class ClientUI(ttk.Frame):
         self.connection_frame.columnconfigure(index=1, weight=1)
         self.connection_frame.columnconfigure(index=2, weight=50)
         self.connection_frame.rowconfigure(index=0, weight=1)
-        self.connection = Connection(self.client, self.connection_frame, self)
+        self.connection = Connection(
+            self.client, self.client_io, self.connection_frame, self)
         self.connection.ip_entry.grid(
             row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
@@ -83,7 +84,6 @@ class ClientUI(ttk.Frame):
 
     def connect_failed_handle(self):
         messagebox.showerror(message="Can't connect to server.")
-        self.client = None
 
     def connect_accepted_handle(self):
         self.server_ip = self.connection.ip_entry.get()
@@ -93,13 +93,16 @@ class ClientUI(ttk.Frame):
 
     def lost_connection_handle(self):
         print('Lost connection')
-        if self.client is not None:
+        try:
             self.client.close()
-            self.client = None
-        self.set_state_widgets('disabled')
-        messagebox.showerror(
-            message='Connection to server lost. Please try to connect again.'
-        )
+            self.client_io.close()
+        finally:
+            self.set_state_widgets('disabled')
+            self.client = Client(self, AF_INET, SOCK_STREAM)
+            self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
+            messagebox.showerror(
+                message='Connection to server lost. Please try to connect again.'
+            )
 
     def setup_control_tab(self):
         # Notebook of control options
@@ -138,17 +141,18 @@ class ClientUI(ttk.Frame):
         self.screen_sharing_tab.rowconfigure(index=1, weight=10000)
         self.screen_sharing_tab.columnconfigure(index=0, weight=1)
         self.screen_sharing_tab.columnconfigure(index=1, weight=1)
-        self.screen_sharing_tab.columnconfigure(index=2, weight=100)
+        self.screen_sharing_tab.columnconfigure(index=2, weight=1)
+        self.screen_sharing_tab.columnconfigure(index=3, weight=100)
 
         # Put tkinter widgets into grid
         self.screen_frame = ttk.LabelFrame(
             self.screen_sharing_tab, text='Screen', padding=(5, 5)
         )
         self.screen_frame.grid(
-            row=1, column=0, columnspan=3, padx=(5, 70), pady=(5, 5), sticky="nsew"
+            row=1, column=0, columnspan=4, padx=(5, 70), pady=(5, 5), sticky="nsew"
         )
         self.screen_sharing = ScreenSharing(
-            self.client, self.screen_sharing_tab, self.screen_frame, self
+            self.client, self.client_io, self.screen_sharing_tab, self.screen_frame, self
         )
 
         self.screen_sharing.start_button.grid(
@@ -156,6 +160,9 @@ class ClientUI(ttk.Frame):
         )
         self.screen_sharing.stop_button.grid(
             row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.screen_sharing.control_button.grid(
+            row=0, column=2, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
 
         self.screen_sharing.picture.pack(fill='both', expand=True)
@@ -222,9 +229,8 @@ class ClientUI(ttk.Frame):
                 self.screen_sharing.sender.stop_server()
                 self.screen_sharing.sender = None
 
-            if self.client is not None:
-                self.client.close()
-                self.client = None
+            self.client.close()
+            self.client_io.close()
         except Exception as e:
             print(e)
         super().destroy()

