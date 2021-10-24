@@ -1,4 +1,5 @@
 from struct import pack, unpack
+from tkinter import messagebox
 import tkinter as tk
 from tkinter import ttk
 import socket
@@ -103,9 +104,29 @@ class ServerSocket(socket.socket):
                         self.info.set(f"Receiving {relpath}")
 
                     path = os.path.join(root, relpath)
+
+                    # Check if path exists
+                    if os.path.exists(path):
+                        self.send_obj(["DUPLICATE", path])
+                        s = self.receive_obj()
+
+                        if s[0] == "NO":
+                            continue
+
+                        if s[0] == "RENAME":
+                            while True:
+                                dir, name = os.path.split(path)
+                                name = "Copy of " + name
+                                path = os.path.join(dir, name)
+                                if not os.path.exists(path):
+                                    break
+                    else:
+                        self.send_obj(["NOT DUPLICATE"])
+
                     print(f"Receiving {path}")
                     os.makedirs(os.path.dirname(path), exist_ok=True)
 
+                    # Start write byte
                     size = length
                     receive = 0
                     with open(path, 'wb') as f:
@@ -185,17 +206,33 @@ class ServerSocket(socket.socket):
                 self.transfer_receive.sendall(relpath.encode() + b'\n')
                 self.transfer_receive.sendall(f'{size}'.encode() + b'\n')
 
-                sent = 0
-                while True:
-                    data = f.read(MAX_TRANSFER)
-                    if not data:
-                        break
+                dup_flag = True
+                s = self.receive_obj()
 
-                    self.transfer_receive.sendall(data)
-                    sent += len(data)
-                    if self.display:
-                        self.progress_bar['value'] = int(sent / size * 100)
-                        self.monitor_window.update()
+                if s[0] == "DUPLICATE":
+                    answer = messagebox.askyesnocancel(
+                        title='Duplicate File', message=f'{s[1]} existed. Do you want to overwrite it? Press Cancel to skip this file.')
+
+                    if answer:
+                        self.send_obj(['OVERWRITE'])
+                    elif answer is None:
+                        self.send_obj(['NO'])
+                        dup_flag = False
+                    else:
+                        self.send_obj(['RENAME'])
+
+                if dup_flag:
+                    sent = 0
+                    while True:
+                        data = f.read(MAX_TRANSFER)
+                        if not data:
+                            break
+
+                        self.transfer_receive.sendall(data)
+                        sent += len(data)
+                        if self.display:
+                            self.progress_bar['value'] = int(sent / size * 100)
+                            self.monitor_window.update()
 
             except:
                 self.transfer_result = 'Cannot transfer {}'.format(relpath)

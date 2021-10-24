@@ -120,6 +120,8 @@ class LocalFrame(tk.Frame):
                 self.file_popup.post(event.x_root + 10, event.y_root)
 
         elif self.last_path != '\\':
+            for item in self.files.selection():
+                self.files.selection_remove(item)
             self.empty_popup.post(event.x_root + 10, event.y_root)
 
     def open(self):
