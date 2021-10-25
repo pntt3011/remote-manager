@@ -211,7 +211,7 @@ class ServerSocket(socket.socket):
 
                 if s[0] == "DUPLICATE":
                     answer = messagebox.askyesnocancel(
-                        title='Duplicate File', message=f'{s[1]} existed. Do you want to overwrite it? Press Cancel to skip this file.')
+                        title='Duplicate File', message=f'{s[1]} existed. Do you want to overwrite it? \nPress No to make a copy, Cancel to skip this file.')
 
                     if answer:
                         self.send_obj(['OVERWRITE'])
