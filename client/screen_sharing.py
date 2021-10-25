@@ -71,8 +71,6 @@ class ScreenSharing:
                 self.clock = time.time()
 
     def start_button_click(self):
-        self.picture.focus_set()
-
         if not self.client.send_obj("SET_RESOLUTION"):
             return
         self.x_res = self.picture.winfo_width()
@@ -101,5 +99,6 @@ class ScreenSharing:
         self.control_flag = not self.control_flag
         if str(self.control_button.cget("text")) == "Start controlling" and self.sender is not None:
             self.control_button.configure(text="Stop controlling")
+            self.picture.focus_set()
         else:
             self.control_button.configure(text="Start controlling")
