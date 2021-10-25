@@ -64,7 +64,7 @@ class ScreenSharing:
 
     def motion(self, event):
         if self.control_flag and self.sender is not None:
-            if 10 * (time.time() - self.clock) >= 1:
+            if 30 * (time.time() - self.clock) >= 1:
                 x = repr(min(event.x / self.x_res, 1.))
                 y = repr(min(event.y / self.y_res, 1.))
                 self.client_io.send_obj(["MOUSE_MOVE", [x, y]])

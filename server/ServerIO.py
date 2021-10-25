@@ -1,6 +1,7 @@
 from pynput.keyboard import Key, Controller
 from ServerSocket import ServerSocket
 import pyautogui
+import mouse
 import socket
 
 HOST = ""
@@ -147,8 +148,8 @@ class ServerIO:
             "MOUSE_MOVE": self.mouse_move,
             "KEY_PRESS": lambda s: self.keyboard.press(key_map[s]),
             "KEY_RELEASE": lambda s: self.keyboard.release(key_map[s]),
-            "MOUSE_UP": lambda s: pyautogui.mouseUp(button=s),
-            "MOUSE_DOWN": lambda s: pyautogui.mouseDown(button=s)
+            "MOUSE_UP": lambda s: mouse.release(button=s),
+            "MOUSE_DOWN": lambda s: mouse.press(button=s)
         }
         self.open_server()
 
@@ -176,7 +177,7 @@ class ServerIO:
     def mouse_move(self, s):
         x = int(float(s[0]) * self.w)
         y = int(float(s[1]) * self.h)
-        pyautogui.moveTo(x, y)
+        mouse.move(x, y)
 
     def stop(self):
         self.flag = False
