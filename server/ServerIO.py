@@ -161,9 +161,9 @@ class ServerIO:
         try:
             self.server.accept()
             print("Accepted")
-        finally:
             self.flag = True
 
+        finally:
             while self.flag:
                 s = self.server.receive_obj()
 
@@ -171,7 +171,6 @@ class ServerIO:
                     break
 
                 if s[0] in self.dict:
-                    print(s[0])
                     self.dict[s[0]](s[1])
 
     def mouse_move(self, s):
