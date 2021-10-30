@@ -57,6 +57,8 @@ class RemoteFrame(LocalFrame):
         self.file_popup = tk.Menu(self, tearoff=0)
         self.file_popup.add_command(label="Copy",
                                     command=self.copy)
+        self.file_popup.add_command(label="Send to local",
+                                    command=self.send_to_local)
         self.file_popup.add_command(label="Paste",
                                     command=self.paste)
         self.file_popup.add_command(label="Delete",
@@ -68,6 +70,11 @@ class RemoteFrame(LocalFrame):
         self.empty_popup.add_command(label="Paste",
                                      command=self.paste)
         self.empty_popup.entryconfig("Paste", state="disabled")
+
+    def send_to_local(self):
+        paths = self.get_selected_path()
+        local_path = self.parent.local_frame.last_path
+        self.parent.local_frame.send_over(paths, local_path)
 
     def paste(self):
         dst = self.get_selected_path()[-1]
@@ -85,10 +92,10 @@ class RemoteFrame(LocalFrame):
             else:
                 messagebox.showerror("Error", s[0])
 
+            self.open_path()
+
         else:
             self.send_over(self.clipboard[1], dst)
-
-        self.open_path()
 
     def delete_item(self):
         paths = self.get_selected_path()
@@ -132,3 +139,5 @@ class RemoteFrame(LocalFrame):
         else:
             messagebox.showerror(
                 "Error", trans_result)
+
+        self.open_path()

@@ -90,6 +90,8 @@ class LocalFrame(tk.Frame):
                                     command=self.open_in_explorer)
         self.file_popup.add_command(label="Copy",
                                     command=self.copy)
+        self.file_popup.add_command(label="Send to remote",
+                                    command=self.send_to_remote)
         self.file_popup.add_command(label="Paste",
                                     command=self.paste)
         self.file_popup.add_command(label="Delete",
@@ -143,6 +145,11 @@ class LocalFrame(tk.Frame):
         self.clipboard[0] = self.flag
         self.clipboard[1] = paths
 
+    def send_to_remote(self):
+        paths = self.get_selected_path()
+        remote_path = self.parent.remote_frame.last_path
+        self.parent.remote_frame.send_over(paths, remote_path)
+
     def paste(self):
         dst = self.get_selected_path()[-1]
         if os.path.isfile(dst):
@@ -166,10 +173,10 @@ class LocalFrame(tk.Frame):
             except Exception as e:
                 messagebox.showerror("Error", e)
 
+            self.open_path()
+
         else:
             self.send_over(srcs, dst)
-
-        self.open_path()
 
     def delete_item(self):
         paths = self.get_selected_path()
@@ -352,3 +359,5 @@ class LocalFrame(tk.Frame):
         else:
             messagebox.showerror(
                 "Error", "Cannot start transferring")
+
+        self.open_path()

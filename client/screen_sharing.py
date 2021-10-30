@@ -4,6 +4,8 @@ from my_client import Client
 from tkinter import ttk
 import time
 
+FPS = 30
+
 
 class ScreenSharing:
     def __init__(self, conn, parent, UI_control):
@@ -65,7 +67,7 @@ class ScreenSharing:
 
     def motion(self, event):
         if self.control_flag and self.sender is not None:
-            if 30 * (time.time() - self.clock) >= 1:
+            if FPS * (time.time() - self.clock) >= 1:
                 x = repr(min(event.x / self.x_res, 1.))
                 y = repr(min(event.y / self.y_res, 1.))
                 self.conn.client_io.send_obj(["MOUSE_MOVE", [x, y]])
