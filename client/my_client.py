@@ -33,6 +33,9 @@ class Client(BaseSocket):
         self.client = self
         self.client_addr = server_ip_address
 
+    def close(self):
+        super().close()
+
     def set_root_window(self, tk):
         self.root_tk = tk
 
@@ -52,7 +55,7 @@ class Client(BaseSocket):
             return pickle.loads(msg)
 
         except:
-            self.UI_control.lost_connection_handle()
+            self.UI_control.handle_lost_connection()
             return None
 
     def send_obj(self, obj):
@@ -64,5 +67,5 @@ class Client(BaseSocket):
             return True
 
         except:
-            self.UI_control.lost_connection_handle()
+            self.UI_control.handle_lost_connection()
             return False

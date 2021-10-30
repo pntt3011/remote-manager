@@ -14,7 +14,7 @@ class LocalFrame(tk.Frame):
     def __init__(self, parent, clipboard):
         super(LocalFrame, self).__init__(parent.share_files_tab)
         self.parent = parent
-        self.client = parent.client
+        self.conn = parent.connection
         self.clipboard = clipboard
         self.flag = True
         self.setup_components()
@@ -337,10 +337,10 @@ class LocalFrame(tk.Frame):
         self.path.insert(0, s)
 
     def send_over(self, paths, local_path):
-        self.client.send_obj(["SEND", paths, local_path])
-        s = self.client.receive_obj()
+        self.conn.client.send_obj(["SEND", paths, local_path])
+        s = self.conn.client.receive_obj()
         if s[0] == "RECEIVE":
-            recv = self.client.receive_item(s[1], True)
+            recv = self.conn.client.receive_item(s[1], True)
             if recv is None:
                 messagebox.showinfo(
                     "Complete", "File transferred successfully.")

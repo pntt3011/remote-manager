@@ -1,18 +1,21 @@
 from typing import Sized
-
+from socket import AF_INET, SOCK_STREAM
 from numpy.random import bit_generator
 from my_client import Client
 from tkinter import font, ttk
 from my_entry import MyEntry
+from my_client import Client
+from BaseSocket import BaseSocket
+import gc
 
 IO_PORT = 5656
 
 
 class Connection:
-    def __init__(self, client, client_io, parent, UI_control):
+    def __init__(self, parent, UI_control):
         self.UI_control = UI_control
-        self.client = client
-        self.client_io = client_io
+        self.client = Client(UI_control, AF_INET, SOCK_STREAM)
+        self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
         self.parent = parent
         self.ip_entry = MyEntry(
             self.parent, 'Enter host ip', '', justify='center', font=("Segoe Ui", 13),
@@ -36,9 +39,17 @@ class Connection:
         try:
             self.client.connect(server_ip)
             self.client_io.connect((server_ip, IO_PORT))
-            self.UI_control.connect_accepted_handle()
+            self.UI_control.handle_accepted_connection()
             return True
         except Exception as e:
             print(e)
-            self.UI_control.connect_failed_handle()
+            print(self.client.client)
+            print(self.client_io.client)
+            self.UI_control.handle_failed_connection()
             return False
+
+    def close(self):
+        self.client.close()
+        self.client_io.close()
+        self.client = Client(self.UI_control, AF_INET, SOCK_STREAM)
+        self.client_io = BaseSocket(AF_INET, SOCK_STREAM)

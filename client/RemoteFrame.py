@@ -16,13 +16,13 @@ class RemoteFrame(LocalFrame):
 
     def open_path(self):
         path = self.path.get()
-        if not self.client.send_obj(["OPEN", path]):
+        if not self.conn.client.send_obj(["OPEN", path]):
             self.path.configure(state='disabled')
             self.set_path(self.last_path)
             return
 
         self.path.configure(state='enabled')
-        data = self.client.receive_obj()
+        data = self.conn.client.receive_obj()
 
         if data == None or 'root' not in data:
             messagebox.showerror("Error", "Invalid path.")
@@ -76,8 +76,8 @@ class RemoteFrame(LocalFrame):
 
         if self.flag == self.clipboard[0]:
             src = self.clipboard[1]
-            self.client.send_obj(["COPY", src, dst])
-            s = self.client.receive_obj()
+            self.conn.client.send_obj(["COPY", src, dst])
+            s = self.conn.client.receive_obj()
 
             if s[0] == "SUCCESS":
                 messagebox.showinfo(
@@ -97,8 +97,8 @@ class RemoteFrame(LocalFrame):
         if not answer:
             return
 
-        self.client.send_obj(["DELETE", paths])
-        s = self.client.receive_obj()
+        self.conn.client.send_obj(["DELETE", paths])
+        s = self.conn.client.receive_obj()
         if s[0] == "SUCCESS":
             messagebox.showinfo(
                 "Complete", "{} items have been deleted".format(len(paths)))
@@ -115,11 +115,11 @@ class RemoteFrame(LocalFrame):
                     "Error", "{} does not exist".format(path))
                 return
 
-        self.client.send_item(paths, remote_path, True)
+        self.conn.client.send_item(paths, remote_path, True)
 
-        trans_result = self.client.transfer_result
+        trans_result = self.conn.client.transfer_result
         if trans_result is None:
-            s = self.client.receive_obj()
+            s = self.conn.client.receive_obj()
 
             if s[0] == "SUCCESS":
                 messagebox.showinfo(

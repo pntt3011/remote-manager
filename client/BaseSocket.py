@@ -29,6 +29,9 @@ class BaseSocket(socket.socket):
         super(BaseSocket, self).connect(address)
         self.client = self
         self.client_addr = address[0]
+    
+    def close(self):
+        super().close()
 
     def accept(self):
         self.client, addr = super(BaseSocket, self).accept()

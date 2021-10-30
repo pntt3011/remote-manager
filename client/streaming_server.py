@@ -180,7 +180,7 @@ class StreamingServer:
                 self.__picture.config(image=img)
                 self.__picture.image = img
             except:
-                self.UI_control.lost_connection_handle()
+                self.UI_control.handle_lost_connection()
                 connection.close()
                 self.__used_slots -= 1
                 break

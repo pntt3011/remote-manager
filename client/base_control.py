@@ -3,8 +3,8 @@ import tkinter as tk
 from my_entry import MyEntry
 
 class BaseControl:
-    def __init__(self, client, parent):
-        self.client = client
+    def __init__(self, conn, parent):
+        self.conn = conn
         self.parent=  parent
         self.run_frame = ttk.LabelFrame(
             self.parent, text='Run process', padding=(5, 5)
@@ -62,6 +62,7 @@ class BaseControl:
                 parent='', index=idx, iid=idx, text='', values=item
             )
             idx += 1
+        self.treeview_sort('name', False)
     
     def treeview_sort(self, col, reverse):
         '''
@@ -80,3 +81,35 @@ class BaseControl:
 
         # reverse sort next time
         self.list.heading(col, command=lambda _col=col: self.treeview_sort(_col, not reverse))
+
+    def setup_UI(self):
+        # Setup grid
+        self.parent.rowconfigure(index=0, weight=1)
+        self.parent.rowconfigure(index=1, weight=10000)
+        self.parent.columnconfigure(index=0, weight=4)
+        self.parent.columnconfigure(index=1, weight=1)
+        self.parent.columnconfigure(index=2, weight=1)
+        self.parent.columnconfigure(index=3, weight=50)
+
+        # Put tkinter widgets into grid
+        self.run_frame.grid(
+            row=0, column=0, columnspan=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.run_frame.columnconfigure(index=0, weight=3)
+        self.run_frame.columnconfigure(index=1, weight=1)
+        self.entry.grid(
+            row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.run_button.grid(
+            row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.list_button.grid(
+            row=0, column=1, padx=(5, 5), pady=(32, 16), sticky="nsew"
+        )
+        self.kill_button.grid(
+            row=0, column=2, padx=(5, 5), pady=(32, 16), sticky="nsew"
+        )
+        self.list_frame.grid(
+            row=1, column=0, columnspan=4, pady=(5, 5), sticky="nsew"
+        )
+        self.list.pack(fill='both', expand=True)

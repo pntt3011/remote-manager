@@ -7,18 +7,18 @@ from tkinter import messagebox
 
 
 class ProcessControl(BaseControl):
-    def __init__(self, client, parent):
-        super().__init__(client, parent)
+    def __init__(self, conn, parent):
+        super().__init__(conn, parent)
         self.list_frame.configure(text='Process')
         self.list.heading('name', text='Process Name', anchor=tk.W)
         self.list.heading('id', text='Process ID', anchor=tk.W)
         self.list.heading('thread_count', text='Thread Count', anchor=tk.W)
 
     def get_list(self):
-        if not self.client.send_obj('XEM_PROCESS'):
+        if not self.conn.client.send_obj('XEM_PROCESS'):
             return False
 
-        return self.client.receive_obj()
+        return self.conn.client.receive_obj()
 
     def run_button_click(self):
         pass
@@ -30,11 +30,11 @@ class ProcessControl(BaseControl):
         else:
             process_id = self.list.item(item_cur)['values'][1]
             print(process_id, type(process_id))
-            if not self.client.send_obj('KILL_PROCESS'):
+            if not self.conn.client.send_obj('KILL_PROCESS'):
                 return
-            if not self.client.send_obj(str(process_id)):
+            if not self.conn.client.send_obj(str(process_id)):
                 return
-            result = self.client.receive_obj()
+            result = self.conn.client.receive_obj()
             print(result)
             if result == "Killed":
                 messagebox.showinfo(message='Process killed.')
@@ -45,3 +45,6 @@ class ProcessControl(BaseControl):
 
     def list_button_click(self):
         return super().list_button_click()
+
+    def setup_UI(self):
+        super().setup_UI()
