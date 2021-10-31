@@ -1,4 +1,5 @@
 import psutil
+import socket
 
 
 class Network:
@@ -21,8 +22,11 @@ class Network:
 
     def get_mac_address(self):
         for interface, snics in psutil.net_if_addrs().items():
+            ip = None
+            mac = None
             for snic in snics:
-                if snic.family == -1:
+                if snic.family == psutil.AF_LINK:
                     mac = snic.address
-                if snic.family == 2:
-                    yield (interface, mac)
+                if snic.family == socket.AF_INET:
+                    ip = snic.address
+                    yield (interface, mac, ip, snic.netmask)
