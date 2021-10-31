@@ -1,4 +1,4 @@
-from tkinter import StringVar, Toplevel, ttk
+from tkinter import Event, StringVar, Toplevel, ttk
 import tkinter as tk
 from my_entry import MyEntry
 
@@ -13,9 +13,6 @@ class BaseControl:
         self.run_button = ttk.Button(
             self.run_frame, text='Start', style='Accent.TButton', command=self.run_button_click
         )
-        self.kill_button = ttk.Button(
-            self.parent, text='Kill', style='Accent.TButton', command=self.kill_button_click
-        )
         self.list_button = ttk.Button(
             self.parent, text='List', style='Accent.TButton', command=self.list_button_click
         )
@@ -25,19 +22,36 @@ class BaseControl:
         self.list = ttk.Treeview(
             self.list_frame, selectmode='browse', yscrollcommand=self.scrollbar.set,
         )
+
         self.scrollbar.config(command=self.list.yview)
-        self.list['columns'] = ('name', 'id', 'thread_count')
+        column = ('name', 'id', 'thread_count')
+        self.list['columns'] = column
         self.list['show'] = 'headings'
         self.list.column('name', stretch=tk.NO)
         self.list.column('id', stretch=tk.NO)
         self.list.column('thread_count', stretch=tk.NO)
+        self.list.bind("<Button-3>", self.popup)
 
         # Sort feature for each column
-        for col in self.list['columns']:
+        for col in column:
             self.list.heading(
                 col, command=lambda _col=col: self.treeview_sort(_col, False)
             )
 
+        self.setup_popup()
+
+
+    def setup_popup(self):
+        self.item_popup = tk.Menu(tearoff=0)
+        self.item_popup.add_command(label="Kill", command=self.kill_button_click)
+
+    def popup(self, event):
+        iid = self.list.identify_row(event.y)
+        print(iid)
+        if iid:
+            self.list.selection_set(iid)
+            self.list.focus(iid)
+            self.item_popup.post(event.x_root, event.y_root)
 
     def get_list(self):
         pass
@@ -105,9 +119,6 @@ class BaseControl:
         )
         self.list_button.grid(
             row=0, column=1, padx=(5, 5), pady=(32, 16), sticky="nsew"
-        )
-        self.kill_button.grid(
-            row=0, column=2, padx=(5, 5), pady=(32, 16), sticky="nsew"
         )
         self.list_frame.grid(
             row=1, column=0, columnspan=4, pady=(5, 5), sticky="nsew"

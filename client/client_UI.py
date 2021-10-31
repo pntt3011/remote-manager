@@ -13,7 +13,7 @@ from BaseSocket import BaseSocket
 import os
 from ctypes import windll
 import sys
-
+from ttkbootstrap import Style
 
 class ClientUI(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -150,9 +150,11 @@ if __name__ == '__main__':
         root.title('Client')
 
         # Set the theme
-        root.tk.call("source", os.path.dirname(
-            os.path.realpath(__file__)) + "/sun-valley.tcl")
-        root.tk.call("set_theme", "light")
+        # root.tk.call("source", os.path.dirname(
+        #     os.path.realpath(__file__)) + "/sun-valley.tcl")
+        # root.tk.call("set_theme", "light")
+        style = Style(theme='minty')
+        root = style.master
 
         client_UI = ClientUI(root)
         client_UI.pack(fill="both", expand=True)
