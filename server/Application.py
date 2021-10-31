@@ -5,8 +5,8 @@ import win32gui
 
 
 class Application(Process):
-    def __init__(self, *args, **kwargs):
-        super(Application, self).__init__(*args, **kwargs)
+    def __init__(self, server):
+        super().__init__(server)
 
     def start_listening(self, s):
         dict = {
@@ -41,28 +41,19 @@ class Application(Process):
         self.server.send_obj(apps)
 
     def kill_application(self):
-        while True:
-            print("KILL_APPLICATION:")
-            s = self.server.receive_obj()
+        # Get running processes
+        pids = self.get_application()
+        pid = self.server.receive_obj()
 
-            if s == "KILLID":
+        # Invalid pid
+        if pid not in pids:
+            print("Invalid application")
+            self.server.send_obj("Invalid application")
+            return
 
-                # Get running processes
-                print("ID:")
-                pids = self.get_application()
-                pid = self.server.receive_obj()
-
-                # Invalid pid
-                if pid not in pids:
-                    print("Invalid application")
-                    self.server.send_obj("Invalid application")
-                    continue
-
-                # If valid, kill
-                self.kill_process_pid(pid)
-
-            elif s == "QUIT":
-                break
+        print(pid)
+        # If valid, kill
+        self.kill_process_pid(pid)
 
     def get_application(self):
         def callback(hwnd, apps):

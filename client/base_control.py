@@ -7,7 +7,7 @@ class BaseControl:
         self.conn = conn
         self.parent=  parent
         self.run_frame = ttk.LabelFrame(
-            self.parent, text='Run process', padding=(5, 5)
+            self.parent, text='Run', padding=(5, 5)
         )
         self.entry = MyEntry(self.run_frame, '', '', justify='center', font=("-size", 13))
         self.run_button = ttk.Button(
@@ -72,8 +72,10 @@ class BaseControl:
         
         idx = 0
         for item in ls:
+            temp = list(item)
+            temp[0] = temp[0].capitalize()
             self.list.insert(
-                parent='', index=idx, iid=idx, text='', values=item
+                parent='', index=idx, iid=idx, text='', values=temp
             )
             idx += 1
         self.treeview_sort('name', False)
@@ -107,20 +109,20 @@ class BaseControl:
 
         # Put tkinter widgets into grid
         self.run_frame.grid(
-            row=0, column=0, columnspan=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+            row=0, column=0, columnspan=1, padx=(5, 5), pady=(0, 0), sticky="nsew"
         )
         self.run_frame.columnconfigure(index=0, weight=3)
         self.run_frame.columnconfigure(index=1, weight=1)
         self.entry.grid(
-            row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
+            row=0, column=0, padx=(5, 5), pady=(0, 0), sticky="nsew"
         )
         self.run_button.grid(
-            row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+            row=0, column=1, padx=(5, 5), pady=(0, 0), sticky="nsew"
         )
         self.list_button.grid(
-            row=0, column=1, padx=(5, 5), pady=(32, 16), sticky="nsew"
+            row=0, column=1, padx=(5, 5), pady=(22, 4), sticky="nsew"
         )
         self.list_frame.grid(
-            row=1, column=0, columnspan=4, pady=(5, 5), sticky="nsew"
+            row=1, column=0, columnspan=4, pady=(0, 0), sticky="nsew"
         )
         self.list.pack(fill='both', expand=True)

@@ -19,7 +19,7 @@ class Process:
 
         if s in dict:
             dict[s]()
-            return True
+            # return True
 
         return False
 
@@ -81,21 +81,12 @@ class Process:
         return res
 
     def start_process(self):
-        while True:
-            print("START_PROCESS:")
-            s = self.server.receive_obj()
+        name = self.server.receive_obj() + ".exe"
 
-            if s == "STARTID":
-                name = self.server.receive_obj() + ".exe"
-
-                try:
-                    os.startfile(name)
-                    self.server.send_obj("Process started")
-                    print("Process started")
-
-                except:
-                    self.server.send_obj("Error")
-                    print("Error")
-
-            elif s == "QUIT":
-                break
+        try:
+            os.startfile(name)
+            self.server.send_obj("Process started")
+            print("Process started")
+        except:
+            self.server.send_obj("Error")
+            print("Error")

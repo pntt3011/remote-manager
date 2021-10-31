@@ -1,3 +1,4 @@
+from tkinter.constants import X
 from typing import Sized
 from socket import AF_INET, SOCK_STREAM
 from numpy.random import bit_generator
@@ -53,3 +54,18 @@ class Connection:
         self.client_io.close()
         self.client = Client(self.UI_control, AF_INET, SOCK_STREAM)
         self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
+    
+    def setup_UI(self):
+        self.parent.columnconfigure(index=0, weight=2)
+        self.parent.columnconfigure(index=1, weight=1)
+        self.parent.columnconfigure(index=2, weight=2)
+        self.parent.rowconfigure(index=0, weight=5)
+        self.parent.rowconfigure(index=1, weight=1)
+        self.parent.rowconfigure(index=2, weight=1)
+        self.parent.rowconfigure(index=3, weight=20)
+        self.ip_entry.grid(
+            row=1, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.connect_button.grid(
+            row=2, column=1, padx=(5, 5), pady=(5, 5), sticky="ns",
+        )
