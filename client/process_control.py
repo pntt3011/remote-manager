@@ -22,7 +22,7 @@ class ProcessControl(BaseControl):
 
     def run_button_click(self):
         if self.entry.get() == '':
-            messagebox.showerror(message='Chưa nhập tên process!')
+            messagebox.showerror(message='Please enter process name.')
             return
 
         if not self.conn.client.send_obj('START_PROCESS'):
@@ -32,10 +32,10 @@ class ProcessControl(BaseControl):
 
         s = self.conn.client.receive_obj()
         if s == "Process started":
-            messagebox.showinfo(message='Process đã được bật!')
+            messagebox.showinfo(message='Process started.')
             self.list_button_click()
         else:
-            messagebox.showerror(message='Đã xảy ra lỗi!')
+            messagebox.showerror(message='An error occurs.')
 
     def kill_button_click(self):
         item_cur = self.list.focus()

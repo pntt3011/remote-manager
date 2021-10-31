@@ -21,7 +21,21 @@ class ApplicationControl(BaseControl):
         return self.conn.client.receive_obj()
 
     def run_button_click(self):
-        pass
+        if self.entry.get() == '':
+            messagebox.showerror(message='Please enter application name.')
+            return
+    
+        if not self.conn.client.send_obj('START_APP'):
+            return
+        if not self.conn.client.send_obj(self.entry.get()):
+            return
+
+        s = self.conn.client.receive_obj()
+        if s == "Process started":
+            messagebox.showinfo(message='Application started.')
+            self.list_button_click()
+        else:
+            messagebox.showerror(message='An error occurs.')
 
     def kill_button_click(self):
         item_cur = self.list.focus()
