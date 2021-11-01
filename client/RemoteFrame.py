@@ -1,14 +1,16 @@
 from LocalFrame import LocalFrame
 from tkinter import messagebox
+from PIL import Image, ImageTk
 import tkinter as tk
-
 import os
+import cv2
 
 
 class RemoteFrame(LocalFrame):
     def __init__(self, parent, clipboard):
         super(RemoteFrame, self).__init__(parent, clipboard)
         self.flag = False
+        del self.icons['File folder']
 
     def reset_path(self):
         self.set_path('\\')
@@ -36,19 +38,27 @@ class RemoteFrame(LocalFrame):
             name = item['name']
             type = item['type']
             size = item['size']
-            image = self.file_icon
+            image = Image.fromarray(item['icon'])
 
-            if type == 'File folder' or name == '..':
-                image = self.folder_icon
+            if type == 'Disk Drive':
+                self.icons[type][name] = ImageTk.PhotoImage(image)
+                img = self.icons[type][name]
 
-            elif type == 'Disk Drive':
-                image = self.disk_icon
+            elif type == 'Application':
+                full_name = os.path.join(path, name)
+                self.icons[type][full_name] = ImageTk.PhotoImage(image)
+                img = self.icons[type][full_name]
+
+            else:
+                if type == 'File' or type not in self.icons:
+                    self.icons[type] = ImageTk.PhotoImage(image)
+                img = self.icons[type]
 
             self.files.insert(
                 parent='', index='end',
                 text='  ' + name,
                 value=(type, size),
-                image=image
+                image=img
             )
 
         self.files.yview_moveto(0)

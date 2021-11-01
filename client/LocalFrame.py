@@ -3,11 +3,18 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from ctypes import windll
-import shutil
-import tkinter as tk
 import os
-import win32com.client
+import cv2
 import psutil
+import shutil
+import numpy as np
+import tkinter as tk
+import win32ui
+import win32gui
+import win32api
+import win32con
+import win32com.client
+import win32comext.shell.shell as shell
 
 
 class LocalFrame(tk.Frame):
@@ -18,7 +25,8 @@ class LocalFrame(tk.Frame):
         self.clipboard = clipboard
         self.flag = True
         self.setup_components()
-        self.setup_files()
+        self.setup_icons()
+        self.reset_path()
 
     def setup_components(self):
         self.grid_rowconfigure(0, weight=1)
@@ -231,32 +239,20 @@ class LocalFrame(tk.Frame):
         scroll_y.config(command=widget.yview)
         scroll_x.config(command=widget.xview)
 
-    def setup_files(self):
-        self.get_assets()
-        self.get_drives()
-        self.reset_path()
-
-    def get_assets(self):
-        asset_path = os.path.join(os.path.dirname(
-            os.path.realpath(__file__)), "assets")
-
-        self.disk_icon = ImageTk.PhotoImage(
-            Image.open(os.path.join(asset_path, "disk.png")))
-
-        self.folder_icon = ImageTk.PhotoImage(
-            Image.open(os.path.join(asset_path, "folder.png")))
-
-        self.file_icon = ImageTk.PhotoImage(
-            Image.open(os.path.join(asset_path, "file.png")))
-
-    def get_drives(self):
-        drps = psutil.disk_partitions()
-        self.drives = [dp.device for dp in drps if dp.fstype == 'NTFS']
+    def setup_icons(self):
+        self.icons = {}
+        self.icons['File folder'] = self.get_icon("C:\\Windows")
+        self.icons['Disk Drive'] = {}
+        self.icons['Application'] = {}
 
     def reset_path(self):
         self.set_path('\\')
         self.last_path = self.path.get()
         self.open_path()
+
+    def get_drives(self):
+        drps = psutil.disk_partitions()
+        return [dp.device for dp in drps if dp.fstype == 'NTFS']
 
     def open_path(self):
         path = self.path.get()
@@ -268,12 +264,13 @@ class LocalFrame(tk.Frame):
         self.last_path = path
 
         if path == "\\":
-            for drive in self.drives:
+            for drive in self.get_drives():
+                self.icons['Disk Drive'][drive] = self.get_icon(drive)
                 self.files.insert(
                     parent='', index='end',
                     text='  ' + drive,
                     values=('Disk Drive', ''),
-                    image=self.disk_icon
+                    image=self.icons['Disk Drive'][drive]
                 )
 
         else:
@@ -281,7 +278,7 @@ class LocalFrame(tk.Frame):
                 parent='', index='end',
                 text='  ..',
                 value=('', ''),
-                image=self.folder_icon
+                image=self.icons['File folder']
             )
 
             for root, dirs, files in os.walk(path):
@@ -307,7 +304,7 @@ class LocalFrame(tk.Frame):
             parent='', index='end',
             text='  ' + dirname,
             value=('File folder', ''),
-            image=self.folder_icon
+            image=self.icons['File folder']
         )
 
     def insert_file(self, root, filename, ns):
@@ -332,11 +329,20 @@ class LocalFrame(tk.Frame):
             file_type = "File"
 
         finally:
+            if file_type == "Application":
+                self.icons['Application'][full_path] = self.get_icon(full_path)
+                img = self.icons['Application'][full_path]
+
+            else:
+                if file_type == "File" or file_type not in self.icons:
+                    self.icons[file_type] = self.get_icon(full_path)
+                img = self.icons[file_type]
+
             self.files.insert(
                 parent='', index='end',
                 text='  ' + filename,
                 value=(file_type, format(file_size, ',')),
-                image=self.file_icon
+                image=img
             )
 
     def set_path(self, s):
@@ -361,3 +367,37 @@ class LocalFrame(tk.Frame):
                 "Error", "Cannot start transferring")
 
         self.open_path()
+
+    def get_icon(self, PATH):
+        SHGFI_ICON = 0x000000100
+        SHGFI_ICONLOCATION = 0x000001000
+        # SHIL_SIZE = 0x00001 # 16x16
+        SHIL_SIZE = 0x00002  # 32x32
+
+        ret, info = shell.SHGetFileInfo(
+            PATH, 0, SHGFI_ICONLOCATION | SHGFI_ICON | SHIL_SIZE)
+        hIcon, iIcon, dwAttr, name, typeName = info
+        ico_x = win32api.GetSystemMetrics(win32con.SM_CXICON)
+        hdc = win32ui.CreateDCFromHandle(win32gui.GetDC(0))
+        hbmp = win32ui.CreateBitmap()
+        hbmp.CreateCompatibleBitmap(hdc, ico_x, ico_x)
+        hdc = hdc.CreateCompatibleDC()
+        hdc.SelectObject(hbmp)
+        hdc.DrawIcon((0, 0), hIcon)
+        win32gui.DestroyIcon(hIcon)
+
+        bmpinfo = hbmp.GetInfo()
+        bmpstr = hbmp.GetBitmapBits(True)
+        icon = Image.frombuffer(
+            "RGBA",
+            (bmpinfo["bmWidth"], bmpinfo["bmHeight"]),
+            bmpstr, "raw", "BGRA", 0, 1
+        )
+
+        # Resize with opencv because PIL resize is ugly
+        icon = np.array(icon)
+        icon = cv2.resize(icon, (20, 20))
+
+        image = Image.fromarray(icon)
+        img = ImageTk.PhotoImage(image)
+        return img
