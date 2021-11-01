@@ -6,6 +6,7 @@ from win32process import SetProcessAffinityMask
 from LocalFrame import LocalFrame
 from RemoteFrame import RemoteFrame
 from screen_sharing import ScreenSharing
+from file_sharing import FileSharing
 from my_client import Client
 from connection import Connection
 from process_control import ProcessControl
@@ -67,7 +68,7 @@ class ClientUI(ttk.Frame):
         #     self.share_files_tab, text='Share \n files', image=self.share_files_icon, compound=tk.TOP
         # )
         self.notebook.add(self.share_files_tab, text='Share \nfiles')
-        self.setup_share_files_tab()
+        #self.setup_share_files_tab()
 
         self.set_state_widgets('disabled')
 
@@ -84,7 +85,6 @@ class ClientUI(ttk.Frame):
         self.connection.client.set_root_window(self.root)
         self.connection.off_button()
         self.set_state_widgets('normal')
-        self.remote_frame.open_path()
 
     def handle_lost_connection(self):
         print('Lost connection')
@@ -100,11 +100,13 @@ class ClientUI(ttk.Frame):
         self.screen_sharing = ScreenSharing(
             self.connection, self.sharing_tab, self
         )
-        self.sharing_tab.rowconfigure(0, weight=2)
+        self.file_sharing = FileSharing(self.sharing_tab, self.connection)
+
+        self.sharing_tab.rowconfigure(0, weight=5)
         self.sharing_tab.rowconfigure(1, weight=1)
         self.sharing_tab.rowconfigure(2, weight=1)
         self.sharing_tab.rowconfigure(3, weight=1)
-        self.sharing_tab.rowconfigure(4, weight=3)
+        self.sharing_tab.rowconfigure(4, weight=25)
         self.sharing_tab.columnconfigure(0, weight=3)
         self.sharing_tab.columnconfigure(1, weight=1)
         self.sharing_tab.columnconfigure(2, weight=3)
@@ -113,6 +115,9 @@ class ClientUI(ttk.Frame):
         )
         self.screen_sharing.control_button.grid(
             row=2, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.file_sharing.share_button.grid(
+            row=3, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
 
     def setup_share_files_tab(self):

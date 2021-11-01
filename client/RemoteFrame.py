@@ -7,8 +7,8 @@ import cv2
 
 
 class RemoteFrame(LocalFrame):
-    def __init__(self, parent, clipboard):
-        super(RemoteFrame, self).__init__(parent, clipboard)
+    def __init__(self, parent, parent_frame, clipboard):
+        super(RemoteFrame, self).__init__(parent, parent_frame, clipboard)
         self.flag = False
         del self.icons['File folder']
 

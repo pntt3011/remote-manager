@@ -18,8 +18,8 @@ import win32comext.shell.shell as shell
 
 
 class LocalFrame(tk.Frame):
-    def __init__(self, parent, clipboard):
-        super(LocalFrame, self).__init__(parent.share_files_tab)
+    def __init__(self, parent, parent_frame, clipboard):
+        super(LocalFrame, self).__init__(parent_frame)
         self.parent = parent
         self.conn = parent.connection
         self.clipboard = clipboard

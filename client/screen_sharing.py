@@ -21,7 +21,7 @@ class ScreenSharing:
         
         self.running = tk.IntVar(self.parent)
         self.share_button = ttk.Checkbutton(
-            self.parent, text='Start capturing', style='custom.Toolbutton',
+            self.parent, text='Start screen capturing', style='Toolbutton',
             variable=self.running, command=self.handle_share_button,
         )
         self.running.set(False)
@@ -42,7 +42,7 @@ class ScreenSharing:
     def handle_control_button(self):
         if self.controlling.get():
             if not self.running.get():
-                messagebox.showerror(message='Please start capturing first.')
+                messagebox.showerror(message='Please start screen capturing first.')
                 self.controlling.set(False)
             else:
                 self.control_button_click()
@@ -50,8 +50,8 @@ class ScreenSharing:
             self.control_button_click()
 
     def handle_share_button(self):
-        if self.running.get() == 1:
-            self.share_button.configure(text='Stop capturing')
+        if self.running.get():
+            self.share_button.configure(text='Stop screen capturing')
             
             if self.screen_frame is None:
                 self.screen_frame = tk.Toplevel(self.parent)
@@ -70,12 +70,12 @@ class ScreenSharing:
             if self.controlling.get():
                 self.controlling.set(False)
                 self.handle_control_button()
-            self.share_button.configure(text='Start capturing')
+            self.share_button.configure(text='Start screen capturing')
             self.screen_frame.withdraw()
             self.stop_button_click()
 
     def handle_quit_screen(self):
-        self.running.set(1 - self.running.get())
+        self.running.set(False)
         self.handle_share_button()
 
     def setup_remote_control(self):
@@ -143,9 +143,9 @@ class ScreenSharing:
 
     def handle_lost_connection(self):
         self.running.set(False)
-        self.share_button.configure(text='Start capturing')
+        self.share_button.configure(text='Start screen capturing')
         self.controlling.set(False)
-        self.share_button.configure(text='Start controlling')
+        self.share_button.configure(text='Start screen controlling')
         self.screen_frame.destroy()
         self.screen_frame = None
 

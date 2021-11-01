@@ -40,6 +40,7 @@ class ServerApp:
             return False
 
     def setup(self):
+        self.running = True
         icons = itertools.cycle(
             glob.glob(os.path.dirname(os.path.realpath(__file__)) + "/*.ico")
         )
@@ -70,7 +71,7 @@ class ServerApp:
         self.start_listening(sysTrayIcon)
 
     def start_listening(self, sysTrayIcon):
-        try:
+        while self.running:
             threading.Thread(target=self.server_io.start_listening).start()
             addr = self.server.accept()
             sysTrayIcon.hover_text = "Connected by " + addr
@@ -101,19 +102,18 @@ class ServerApp:
                     if listener(s):
                         break
 
-            sysTrayIcon.hover_text = "Waiting for connection..."
-            sysTrayIcon.refresh_icon()
+            if self.running:
+                sysTrayIcon.hover_text = "Waiting for connection..."
+                sysTrayIcon.refresh_icon()
 
-            self.screen.close_screen_share()
-            self.server_io.stop()
-            self.key_logger.stop()
-            self.start_listening(sysTrayIcon)
-
-        except:
-            self.quit(sysTrayIcon)
+                self.screen.close_screen_share()
+                self.server_io.stop()
+                self.key_logger.stop()
+                self.start_listening(sysTrayIcon)
 
     def quit(self, SysTrayIcon):
         try:
+            self.running = False
             self.screen.close_screen_share()
             self.key_logger.stop()
             self.server_io.close()
