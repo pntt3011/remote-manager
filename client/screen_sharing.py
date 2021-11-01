@@ -16,6 +16,7 @@ class ScreenSharing:
         self.conn = conn
         self.parent = parent
         self.UI_control = UI_control
+        self.screen_frame = None
         self.mystyle = ttk.Style(self.parent)
         
         self.running = tk.IntVar(self.parent)
@@ -54,17 +55,23 @@ class ScreenSharing:
         print('state', self.running.get())
         if self.running.get() == 1:
             self.share_button.configure(text='Stop capturing')
-            self.screen_frame = tk.Toplevel(self.parent)
-            self.screen_frame.protocol('WM_DELETE_WINDOW', self.handle_share_button)
-            self.screen_frame.title('Screen')
+            
+            if self.screen_frame is None:
+                self.screen_frame = tk.Toplevel(self.parent)
+                self.screen_frame.protocol('WM_DELETE_WINDOW', self.handle_share_button)
+                self.screen_frame.title('Screen')
+                self.picture = ttk.Label(self.screen_frame)
+                self.picture.pack(fill='both', expand=True)
+                self.setup_remote_control()
+            else:
+                self.screen_frame.deiconify()
+            
             self.screen_frame.state('zoomed')
-            self.picture = ttk.Label(self.screen_frame)
-            self.picture.pack(fill='both', expand=True)
-            self.setup_remote_control()
             self.start_button_click()
+
         else:
             self.share_button.configure(text='Start capturing')
-            self.screen_frame.destroy()
+            self.screen_frame.withdraw()
             self.stop_button_click()
 
     def setup_remote_control(self):
@@ -119,7 +126,7 @@ class ScreenSharing:
             if not self.conn.client.send_obj("START_CAPTURE"):
                 return
             self.sender = StreamingServer(
-                self.UI_control, '', 9696, self.picture
+                self, '', 9696, self.picture
             )
         self.sender.start_server()
 
@@ -131,6 +138,18 @@ class ScreenSharing:
         if self.sender is not None:
             self.sender.stop_server()
             self.sender = None
+
+    def handle_lost_connection(self):
+        self.running.set(False)
+        self.share_button.configure(text='Start capturing')
+        self.screen_frame.destroy()
+        self.screen_frame = None
+
+        if self.sender is not None:
+            self.sender.stop_server()
+            self.sender = None
+        
+        self.UI_control.handle_lost_connection()
 
     def control_button_click(self):
         self.control_flag = not self.control_flag
