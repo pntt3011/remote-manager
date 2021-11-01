@@ -244,6 +244,7 @@ class LocalFrame(tk.Frame):
         self.icons['File folder'] = self.get_icon("C:\\Windows")
         self.icons['Disk Drive'] = {}
         self.icons['Application'] = {}
+        self.icons['Shortcut'] = {}
 
     def reset_path(self):
         self.set_path('\\')
@@ -329,9 +330,9 @@ class LocalFrame(tk.Frame):
             file_type = "File"
 
         finally:
-            if file_type == "Application":
-                self.icons['Application'][full_path] = self.get_icon(full_path)
-                img = self.icons['Application'][full_path]
+            if file_type == "Application" or file_type == "Shortcut":
+                self.icons[file_type][full_path] = self.get_icon(full_path)
+                img = self.icons[file_type][full_path]
 
             else:
                 if file_type == "File" or file_type not in self.icons:
@@ -396,7 +397,7 @@ class LocalFrame(tk.Frame):
 
         # Resize with opencv because PIL resize is ugly
         icon = np.array(icon)
-        icon = cv2.resize(icon, (20, 20))
+        icon = cv2.resize(icon, (19, 19))
 
         image = Image.fromarray(icon)
         img = ImageTk.PhotoImage(image)

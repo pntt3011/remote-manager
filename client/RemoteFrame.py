@@ -44,7 +44,7 @@ class RemoteFrame(LocalFrame):
                 self.icons[type][name] = ImageTk.PhotoImage(image)
                 img = self.icons[type][name]
 
-            elif type == 'Application':
+            elif type == 'Application' or type == 'Shortcut':
                 full_name = os.path.join(path, name)
                 self.icons[type][full_name] = ImageTk.PhotoImage(image)
                 img = self.icons[type][full_name]
