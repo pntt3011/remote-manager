@@ -14,6 +14,7 @@ import pickle
 import struct
 import threading
 from PIL import ImageTk, Image
+from win32process import error
 
 
 class StreamingServer:
@@ -177,9 +178,10 @@ class StreamingServer:
             img = ImageTk.PhotoImage(image)
 
             try:
-                self.__picture.config(image=img)
+                self.__picture.configure(image=img)
                 self.__picture.image = img
-            except:
+            except Exception as e:
+                print(e)
                 self.UI_control.handle_lost_connection()
                 connection.close()
                 self.__used_slots -= 1

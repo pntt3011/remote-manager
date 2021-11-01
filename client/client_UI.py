@@ -52,13 +52,10 @@ class ClientUI(ttk.Frame):
         self.app_control = ApplicationControl(self.connection, self.app_control_tab)
         self.app_control.setup_UI()
         
-        # Screen sharing tab
-        self.screen_sharing_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.screen_sharing_tab, text='Screen \ncapturing')
-        self.screen_sharing = ScreenSharing(
-            self.connection, self.screen_sharing_tab, self
-        )
-        self.screen_sharing.setup_UI()
+        # Sharing tab
+        self.sharing_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.sharing_tab, text='Share\n')
+        self.setup_sharing_tab()
 
         # Share files tab
         self.share_files_tab = ttk.Frame(self.notebook)
@@ -84,21 +81,35 @@ class ClientUI(ttk.Frame):
     def handle_accepted_connection(self):
         self.server_ip = self.connection.ip_entry.get()
         messagebox.showinfo(message='Successfully connect to server.')
+        self.connection.client.set_root_window(self.root)
         self.set_state_widgets('normal')
         self.remote_frame.open_path()
 
     def handle_lost_connection(self):
         print('Lost connection')
         self.connection.close()
-        self.connection.client.set_root_window(self.root)
         self.set_state_widgets('disabled')
         messagebox.showerror(
             message='Connection to server lost. Please try to connect again.'
         )
 
-    def setup_share_files_tab(self):
-        self.connection.client.set_root_window(self.root)
+    def setup_sharing_tab(self):
+        self.screen_sharing = ScreenSharing(
+            self.connection, self.sharing_tab, self
+        )
+        self.sharing_tab.rowconfigure(0, weight=2)
+        self.sharing_tab.rowconfigure(1, weight=1)
+        self.sharing_tab.rowconfigure(2, weight=1)
+        self.sharing_tab.rowconfigure(3, weight=1)
+        self.sharing_tab.rowconfigure(4, weight=3)
+        self.sharing_tab.columnconfigure(0, weight=3)
+        self.sharing_tab.columnconfigure(1, weight=1)
+        self.sharing_tab.columnconfigure(2, weight=3)
+        self.screen_sharing.share_button.grid(
+            row=1, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
 
+    def setup_share_files_tab(self):
         self.share_files_tab.grid_rowconfigure(0, weight=1)
         self.share_files_tab.grid_columnconfigure(0, weight=1)
         self.share_files_tab.grid_columnconfigure(1, weight=1)
