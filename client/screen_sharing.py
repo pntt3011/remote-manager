@@ -1,3 +1,4 @@
+from tkinter import messagebox
 from tkinter.messagebox import NO
 from typing import Text
 
@@ -17,48 +18,44 @@ class ScreenSharing:
         self.parent = parent
         self.UI_control = UI_control
         self.screen_frame = None
-        self.mystyle = ttk.Style(self.parent)
         
         self.running = tk.IntVar(self.parent)
-        self.mystyle.map(
-            style='custom.Toolbutton', background=[('disabled', 'blue'), ('selected', 'red'),
-            ('!selected', 'green')], foreground=[('disabled', 'white'), ('selected', 'black'),
-            ('!selected', 'black')]
-        )
-        self.mystyle.configure(
-            style='custom.Toolbutton', font=('Helvetica', 13, 'bold')
-        )
         self.share_button = ttk.Checkbutton(
             self.parent, text='Start capturing', style='custom.Toolbutton',
             variable=self.running, command=self.handle_share_button,
         )
         self.running.set(False)
-        # self.start_button = ttk.Button(parent,
-        #                                text='Start capturing',
-        #                                style='Accent.TButton',
-        #                                command=self.start_button_click,)
-        # self.stop_button = ttk.Button(parent,
-        #                               text='Stop capturing',
-        #                               style='Accent.TButton',
-        #                               command=self.stop_button_click,)
-        # self.control_button = ttk.Button(parent,
-        #                                  text='Start controlling',
-        #                                  style='Accent.TButton',
-        #                                  command=self.control_button_click,)
+
+        self.controlling  = tk.IntVar(self.parent)
+        self.control_button = ttk.Checkbutton(
+            self.parent, text='Start controlling', style='Toolbutton',
+            variable=self.controlling, command=self.handle_control_button,
+        )
+        self.controlling.set(False)
+
         self.control_flag = False
         self.sender = None
         self.x_res = None
         self.y_res = None
         self.clock = time.time()
 
+    def handle_control_button(self):
+        if self.controlling.get():
+            if not self.running.get():
+                messagebox.showerror(message='Please start capturing first.')
+                self.controlling.set(False)
+            else:
+                self.control_button_click()
+        else:
+            self.control_button_click()
+
     def handle_share_button(self):
-        print('state', self.running.get())
         if self.running.get() == 1:
             self.share_button.configure(text='Stop capturing')
             
             if self.screen_frame is None:
                 self.screen_frame = tk.Toplevel(self.parent)
-                self.screen_frame.protocol('WM_DELETE_WINDOW', self.handle_share_button)
+                self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_screen)
                 self.screen_frame.title('Screen')
                 self.picture = ttk.Label(self.screen_frame)
                 self.picture.pack(fill='both', expand=True)
@@ -70,9 +67,16 @@ class ScreenSharing:
             self.start_button_click()
 
         else:
+            if self.controlling.get():
+                self.controlling.set(False)
+                self.handle_control_button()
             self.share_button.configure(text='Start capturing')
             self.screen_frame.withdraw()
             self.stop_button_click()
+
+    def handle_quit_screen(self):
+        self.running.set(1 - self.running.get())
+        self.handle_share_button()
 
     def setup_remote_control(self):
         self.picture.bind("<KeyPress>", self.keydown)
@@ -126,15 +130,13 @@ class ScreenSharing:
             if not self.conn.client.send_obj("START_CAPTURE"):
                 return
             self.sender = StreamingServer(
-                self, '', 9696, self.picture
+                self.UI_control, '', 9696, self.picture
             )
         self.sender.start_server()
 
     def stop_button_click(self):
-        print('a')
         if not self.conn.client.send_obj("STOP_CAPTURE"):
             return
-        print('b')
         if self.sender is not None:
             self.sender.stop_server()
             self.sender = None
@@ -142,6 +144,8 @@ class ScreenSharing:
     def handle_lost_connection(self):
         self.running.set(False)
         self.share_button.configure(text='Start capturing')
+        self.controlling.set(False)
+        self.share_button.configure(text='Start controlling')
         self.screen_frame.destroy()
         self.screen_frame = None
 
@@ -149,7 +153,7 @@ class ScreenSharing:
             self.sender.stop_server()
             self.sender = None
         
-        self.UI_control.handle_lost_connection()
+        # self.UI_control.handle_lost_connection()
 
     def control_button_click(self):
         self.control_flag = not self.control_flag

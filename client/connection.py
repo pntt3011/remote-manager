@@ -69,3 +69,11 @@ class Connection:
         self.connect_button.grid(
             row=2, column=1, padx=(5, 5), pady=(5, 5), sticky="ns",
         )
+
+    def on_button(self):
+        self.connect_button['state'] = 'normal'
+        self.connect_button.configure(text='Connect')
+
+    def off_button(self):
+        self.connect_button['state'] = 'disabled'
+        self.connect_button.configure(text='Connected')

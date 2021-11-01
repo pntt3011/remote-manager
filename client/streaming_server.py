@@ -51,7 +51,7 @@ class StreamingServer:
     """
 
     # TODO: Implement slots functionality
-    def __init__(self, parent, host, port, picture, slots=8, quit_key='q'):
+    def __init__(self, UI_control, host, port, picture, slots=8, quit_key='q'):
         """
         Creates a new instance of StreamingServer
         Parameters
@@ -65,7 +65,7 @@ class StreamingServer:
         quit_key : chr
             key that has to be pressed to close connection (default = 'q')  
         """
-        self.parent = parent
+        self.UI_control = UI_control
         self.__host = host
         self.__port = port
         self.__slots = slots
@@ -158,7 +158,8 @@ class StreamingServer:
                 data += received
 
             if break_loop:
-                self.parent.handle_lost_connection()
+                if self.__running:
+                    self.UI_control.handle_lost_connection()
                 break
 
             packed_msg_size = data[:payload_size]

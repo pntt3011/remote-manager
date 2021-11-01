@@ -82,13 +82,16 @@ class ClientUI(ttk.Frame):
         self.server_ip = self.connection.ip_entry.get()
         messagebox.showinfo(message='Successfully connect to server.')
         self.connection.client.set_root_window(self.root)
+        self.connection.off_button()
         self.set_state_widgets('normal')
         self.remote_frame.open_path()
 
     def handle_lost_connection(self):
         print('Lost connection')
+        self.screen_sharing.handle_lost_connection()
         self.connection.close()
         self.set_state_widgets('disabled')
+        self.connection.on_button()
         messagebox.showerror(
             message='Connection to server lost. Please try to connect again.'
         )
@@ -107,6 +110,9 @@ class ClientUI(ttk.Frame):
         self.sharing_tab.columnconfigure(2, weight=3)
         self.screen_sharing.share_button.grid(
             row=1, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
+        self.screen_sharing.control_button.grid(
+            row=2, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
 
     def setup_share_files_tab(self):
