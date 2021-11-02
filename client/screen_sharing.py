@@ -115,6 +115,7 @@ class ScreenSharing:
     def start_button_click(self):
         if not self.conn.client.send_obj("SET_RESOLUTION"):
             return
+        self.picture.update()
         self.x_res = self.picture.winfo_width()
         self.y_res = self.picture.winfo_height()
         print(self.x_res, 'x', self.y_res)

