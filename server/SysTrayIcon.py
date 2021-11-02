@@ -84,7 +84,8 @@ class SysTrayIcon(object):
         self.notify_id = None
         self.refresh_icon()
 
-        threading.Thread(target=lambda: on_start(self), daemon=True).start()
+        self.thread = threading.Thread(target=lambda: on_start(self))
+        self.thread.start()
         win32gui.PumpMessages()
 
     def _add_ids_to_menu_options(self, menu_options):
@@ -140,6 +141,7 @@ class SysTrayIcon(object):
     def destroy(self, hwnd, msg, wparam, lparam):
         if self.on_quit:
             self.on_quit(self)
+            self.thread.join()
         nid = (self.hwnd, 0)
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, nid)
         win32gui.PostQuitMessage(0)  # Terminate the app.

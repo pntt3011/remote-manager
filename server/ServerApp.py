@@ -17,6 +17,7 @@ import glob
 import sys
 import socket
 import os
+import signal
 
 HOST = ""
 PORT = 8080
@@ -72,7 +73,8 @@ class ServerApp:
 
     def start_listening(self, sysTrayIcon):
         while self.running:
-            threading.Thread(target=self.server_io.start_listening).start()
+            self.thread = threading.Thread(target=self.server_io.start_listening)
+            self.thread.start()
             addr = self.server.accept()
             sysTrayIcon.hover_text = "Connected by " + addr
             sysTrayIcon.refresh_icon()
@@ -109,7 +111,6 @@ class ServerApp:
                 self.screen.close_screen_share()
                 self.server_io.stop()
                 self.key_logger.stop()
-                self.start_listening(sysTrayIcon)
 
     def quit(self, SysTrayIcon):
         try:
@@ -117,10 +118,21 @@ class ServerApp:
             self.screen.close_screen_share()
             self.key_logger.stop()
             self.server_io.close()
+            self.thread.join()
             self.server.close()
         except:
             pass
 
-
 if __name__ == "__main__":
-    ServerApp()
+    def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+
+    Logo = resource_path("favicon.ico")
+
+    a = ServerApp()
+    os.kill(os.getpid(), signal.SIGINT)

