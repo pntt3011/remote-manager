@@ -62,6 +62,8 @@ class ScreenSharing:
                 self.screen_frame.deiconify()
             
             self.screen_frame.state('zoomed')
+            self.new_state = 'normal'
+            self.screen_frame.bind('<Configure>', self.handle_resize)
             self.start_button_click()
 
         else:
@@ -71,6 +73,27 @@ class ScreenSharing:
             self.share_button.configure(text='Start screen capturing')
             self.screen_frame.withdraw()
             self.stop_button_click()
+
+    def handle_resize(self, event):
+        self.old_state = self.new_state # assign the old state value
+        self.new_state = self.screen_frame.state() # get the new state value
+        if self.new_state == 'normal' and self.old_state == 'zoomed':
+            self.screen_frame.wm_geometry('960x540')
+        self.set_res()
+        
+
+    def set_res(self):
+        self.picture.update()
+        x_res = self.picture.winfo_width()
+        y_res = self.picture.winfo_height()
+        self.x_res = min(x_res, int(16/9 * y_res))
+        self.y_res = min(y_res, int(9/16 * x_res))
+        # print(self.x_res, 'x', self.y_res)
+        if not self.conn.client.send_obj("SET_RESOLUTION"):
+            return False
+        if not self.conn.client.send_obj([self.x_res, self.y_res]):
+            return False
+        return True
 
     def handle_quit_screen(self):
         self.running.set(False)
@@ -113,15 +136,7 @@ class ScreenSharing:
                 self.clock = time.time()
 
     def start_button_click(self):
-        if not self.conn.client.send_obj("SET_RESOLUTION"):
-            return
-        self.picture.update()
-        self.x_res = self.picture.winfo_width()
-        self.y_res = self.picture.winfo_height()
-        print(self.x_res, 'x', self.y_res)
-        self.x_res, self.y_res = min(
-            self.x_res, 16/9 * self.y_res), min(self.y_res, 9/16 * self.x_res)
-        if not self.conn.client.send_obj([self.x_res, self.y_res]):
+        if not self.set_res():
             return
 
         if self.sender is None:

@@ -41,10 +41,18 @@ class FileSharing:
                 self.file_frame.deiconify()
             
             self.file_frame.state('zoomed')
+            self.new_state = 'normal'
+            self.file_frame.bind('<Configure>', self.handle_resize)
 
         else:
             self.share_button.configure(text='Start file sharing')
             self.file_frame.withdraw()
+
+    def handle_resize(self, event):
+        self.old_state = self.new_state # assign the old state value
+        self.new_state = self.file_frame.state() # get the new state value
+        if self.new_state == 'normal' and self.old_state == 'zoomed':
+            self.file_frame.wm_geometry('960x540')
 
     def handle_quit_sharing(self):
         self.sharing.set(False)
