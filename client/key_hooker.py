@@ -94,6 +94,8 @@ class KeyHooker:
 
     def handle_lost_connection(self):
         self.set_off_hook()
+        self.set_off_block()
+        self.handle_clear_button()
 
     def setup_UI(self):
         # Setup grid

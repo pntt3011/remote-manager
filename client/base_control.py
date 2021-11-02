@@ -18,7 +18,6 @@ class BaseControl:
         )
         self.list_frame = ttk.LabelFrame(self.parent, padding=(5, 5))
         self.scrollbar = ttk.Scrollbar(self.list_frame)
-        self.scrollbar.pack(side="right", fill="y")
         self.list = ttk.Treeview(
             self.list_frame, selectmode='browse', yscrollcommand=self.scrollbar.set,
         )
@@ -27,9 +26,6 @@ class BaseControl:
         column = ('name', 'id', 'thread_count')
         self.list['columns'] = column
         self.list['show'] = 'headings'
-        self.list.column('name', stretch=tk.NO)
-        self.list.column('id', stretch=tk.NO)
-        self.list.column('thread_count', stretch=tk.NO)
         self.list.bind("<Button-3>", self.popup)
 
         # Sort feature for each column
@@ -98,6 +94,9 @@ class BaseControl:
         # reverse sort next time
         self.list.heading(col, command=lambda _col=col: self.treeview_sort(_col, not reverse))
 
+    def handle_lost_connection(self):
+        self.list.delete(*self.list.get_children())
+
     def setup_UI(self):
         # Setup grid
         self.parent.rowconfigure(index=0, weight=1)
@@ -125,4 +124,5 @@ class BaseControl:
         self.list_frame.grid(
             row=1, column=0, columnspan=4, pady=(0, 0), sticky="nsew"
         )
+        self.scrollbar.pack(side="right", fill="y")
         self.list.pack(fill='both', expand=True)

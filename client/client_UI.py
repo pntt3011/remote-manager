@@ -11,6 +11,7 @@ from my_client import Client
 from connection import Connection
 from process_control import ProcessControl
 from key_hooker import KeyHooker
+from network_info import NetworkInfo
 from application_control import ApplicationControl
 from socket import socket, AF_INET, SOCK_STREAM
 from BaseSocket import BaseSocket
@@ -65,6 +66,16 @@ class ClientUI(ttk.Frame):
         self.key_hooker = KeyHooker(self.keyboard_control_tab, self.connection)
         self.key_hooker.setup_UI()
 
+        # MAC collecting tab
+        self.network_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.network_tab, text='MAC\naddress')
+        self.network_info = NetworkInfo(self.network_tab, self.connection)
+
+        self.widgets = [self.connection, self.process_control, self.app_control,
+                        self.key_hooker, self.network_info, self.file_sharing,
+                        self.screen_sharing]
+        self.network_info.setup_UI()
+
         self.set_state_widgets('disabled')
 
     def set_state_widgets(self, state):
@@ -83,9 +94,11 @@ class ClientUI(ttk.Frame):
 
     def handle_lost_connection(self):
         print('Lost connection')
-        self.screen_sharing.handle_lost_connection()
-        self.file_sharing.handle_lost_connection()
-        self.key_hooker.handle_lost_connection()
+        
+        # Call handle function of widgets
+        for widget in self.widgets:
+            widget.handle_lost_connection()
+        
         self.connection.close()
         self.set_state_widgets('disabled')
         self.connection.on_button()

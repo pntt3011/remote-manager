@@ -73,6 +73,9 @@ class Connection:
             row=2, column=1, padx=(5, 5), pady=(5, 5), sticky="ns",
         )
 
+    def handle_lost_connection(self):
+        pass
+
     def on_button(self):
         self.connect_button['state'] = 'normal'
         self.connect_button.configure(text='Connect')
