@@ -117,6 +117,7 @@ class BaseSocket(socket.socket):
                             self.send_obj(['YES'])
                         elif answer is None:
                             self.send_obj(['NO'])
+                            continue
                         else:
                             while True:
                                 dir, name = os.path.split(path)

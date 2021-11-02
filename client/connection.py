@@ -56,6 +56,7 @@ class Connection:
         self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
     
     def setup_UI(self):
+        # Setup grid
         self.parent.columnconfigure(index=0, weight=2)
         self.parent.columnconfigure(index=1, weight=1)
         self.parent.columnconfigure(index=2, weight=2)
@@ -63,6 +64,8 @@ class Connection:
         self.parent.rowconfigure(index=1, weight=1)
         self.parent.rowconfigure(index=2, weight=1)
         self.parent.rowconfigure(index=3, weight=20)
+
+        # Put tkinter widgets into grid
         self.ip_entry.grid(
             row=1, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )

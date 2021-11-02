@@ -12,7 +12,6 @@ class FileSharing:
             self.parent, text='Start file sharing', style='Toolbutton',
             variable=self.sharing, command=self.handle_share_button,
         )
-        self.sharing.set(False)
         self.file_frame = None
         self.remote_frame = None
         self.local_frame = None
@@ -50,3 +49,10 @@ class FileSharing:
     def handle_quit_sharing(self):
         self.sharing.set(False)
         self.handle_share_button()
+
+    def handle_lost_connection(self):
+        self.sharing.set(False)
+        self.share_button.configure(text='Start file sharing')
+        if self.file_frame is not None:
+            self.file_frame.destroy()
+            self.file_frame = None

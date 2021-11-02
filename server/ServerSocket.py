@@ -180,7 +180,7 @@ class ServerSocket(socket.socket):
                 s = self.receive_obj()
 
                 if s[0] == "NO":
-                    return
+                    return flag
 
                 sent = 0
                 while True:

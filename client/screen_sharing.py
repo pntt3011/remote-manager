@@ -24,14 +24,12 @@ class ScreenSharing:
             self.parent, text='Start screen capturing', style='Toolbutton',
             variable=self.running, command=self.handle_share_button,
         )
-        self.running.set(False)
 
         self.controlling  = tk.IntVar(self.parent)
         self.control_button = ttk.Checkbutton(
             self.parent, text='Start controlling', style='Toolbutton',
             variable=self.controlling, command=self.handle_control_button,
         )
-        self.controlling.set(False)
 
         self.control_flag = False
         self.sender = None
@@ -117,7 +115,6 @@ class ScreenSharing:
     def start_button_click(self):
         if not self.conn.client.send_obj("SET_RESOLUTION"):
             return
-        self.picture.update()
         self.x_res = self.picture.winfo_width()
         self.y_res = self.picture.winfo_height()
         print(self.x_res, 'x', self.y_res)
@@ -146,8 +143,9 @@ class ScreenSharing:
         self.share_button.configure(text='Start screen capturing')
         self.controlling.set(False)
         self.share_button.configure(text='Start screen controlling')
-        self.screen_frame.destroy()
-        self.screen_frame = None
+        if self.screen_frame is not None:
+            self.screen_frame.destroy()
+            self.screen_frame = None
 
         if self.sender is not None:
             self.sender.stop_server()

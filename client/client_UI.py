@@ -10,6 +10,7 @@ from file_sharing import FileSharing
 from my_client import Client
 from connection import Connection
 from process_control import ProcessControl
+from key_hooker import KeyHooker
 from application_control import ApplicationControl
 from socket import socket, AF_INET, SOCK_STREAM
 from BaseSocket import BaseSocket
@@ -37,19 +38,19 @@ class ClientUI(ttk.Frame):
 
         # Connection tab
         self.connection_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.connection_tab, text='Connect \n')
+        self.notebook.add(self.connection_tab, text='Connect\n')
         self.connection = Connection(self.connection_tab, self)
         self.connection.setup_UI()
 
         # Process control tab
         self.process_control_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.process_control_tab, text='Process \ncontrol')
+        self.notebook.add(self.process_control_tab, text='Process\ncontrol')
         self.process_control = ProcessControl(self.connection, self.process_control_tab)
         self.process_control.setup_UI()
         
         # Application control tab
         self.app_control_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.app_control_tab, text='Application \ncontrol')
+        self.notebook.add(self.app_control_tab, text='Application\ncontrol')
         self.app_control = ApplicationControl(self.connection, self.app_control_tab)
         self.app_control.setup_UI()
         
@@ -58,17 +59,11 @@ class ClientUI(ttk.Frame):
         self.notebook.add(self.sharing_tab, text='Share\n')
         self.setup_sharing_tab()
 
-        # Share files tab
-        self.share_files_tab = ttk.Frame(self.notebook)
-        self.share_files_icon = ImageTk.PhotoImage(Image.open(
-            os.path.dirname(os.path.realpath(__file__)) +
-            '/res/share_files_icon.png'
-        ))
-        # self.notebook.add(
-        #     self.share_files_tab, text='Share \n files', image=self.share_files_icon, compound=tk.TOP
-        # )
-        self.notebook.add(self.share_files_tab, text='Share \nfiles')
-        #self.setup_share_files_tab()
+        # Keyboard control tab
+        self.keyboard_control_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.keyboard_control_tab, text='Keyboard\ncontrol')
+        self.key_hooker = KeyHooker(self.keyboard_control_tab, self.connection)
+        self.key_hooker.setup_UI()
 
         self.set_state_widgets('disabled')
 
@@ -89,6 +84,8 @@ class ClientUI(ttk.Frame):
     def handle_lost_connection(self):
         print('Lost connection')
         self.screen_sharing.handle_lost_connection()
+        self.file_sharing.handle_lost_connection()
+        self.key_hooker.handle_lost_connection()
         self.connection.close()
         self.set_state_widgets('disabled')
         self.connection.on_button()
@@ -119,19 +116,6 @@ class ClientUI(ttk.Frame):
         self.file_sharing.share_button.grid(
             row=3, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
-
-    def setup_share_files_tab(self):
-        self.share_files_tab.grid_rowconfigure(0, weight=1)
-        self.share_files_tab.grid_columnconfigure(0, weight=1)
-        self.share_files_tab.grid_columnconfigure(1, weight=1)
-
-        self.clipboard = [None] * 2
-
-        self.local_frame = LocalFrame(self, self.clipboard)
-        self.local_frame.grid(row=0, column=0, padx=10, sticky="nsew")
-
-        self.remote_frame = RemoteFrame(self, self.clipboard)
-        self.remote_frame.grid(row=0, column=1, padx=10, sticky="nsew")
 
     def destroy(self):
         try:

