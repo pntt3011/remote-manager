@@ -59,16 +59,22 @@ class LocalFrame(tk.Frame):
         self.files.heading('Type', text='Type', anchor=CENTER)
         self.files.heading('Size', text='Size', anchor=CENTER)
 
-        self.files.bind('<Double-Button-1>',
-                        lambda _: self.on_click_item())
+        self.files.bind('<Double-Button-1>', self.on_double_click_item)
+        self.files.bind('<Button-1>', self.on_click_item)
 
         self.setup_popup_menu()
         self.files.bind("<Button-3>", self.popup)
 
-    def on_click_item(self):
-        selected = self.files.selection()
-        if len(selected) > 0:
-            curr_item = self.files.item(selected[0])
+    def reset_selection(self):
+        for item in self.files.selection():
+            self.files.selection_remove(item)
+
+    def on_double_click_item(self, event):
+        iid = self.files.identify_row(event.y)
+        if iid:
+            self.files.focus(iid)
+            self.files.selection_set(iid)
+            curr_item = self.files.item(self.files.focus())
             dir_list = ['File folder', 'Disk Drive', '']
 
             if curr_item['values'][0] in dir_list:
@@ -85,6 +91,18 @@ class LocalFrame(tk.Frame):
 
                 self.set_path(new_path)
                 self.open_path()
+
+        else:
+            self.reset_selection()
+
+    def on_click_item(self, event):
+        iid = self.files.identify_row(event.y)
+        if not iid:
+            self.reset_selection()
+            return "break"
+
+        else:
+            pass
 
     def setup_popup_menu(self):
         self.setup_file_popup()
@@ -129,10 +147,10 @@ class LocalFrame(tk.Frame):
                     self.files.selection_set(iid)
                 self.file_popup.post(event.x_root + 10, event.y_root)
 
-        elif self.last_path != '\\':
-            for item in self.files.selection():
-                self.files.selection_remove(item)
-            self.empty_popup.post(event.x_root + 10, event.y_root)
+        else:
+            self.reset_selection()
+            if self.last_path != '\\':
+                self.empty_popup.post(event.x_root + 10, event.y_root)
 
     def open(self):
         paths = self.get_selected_path()
