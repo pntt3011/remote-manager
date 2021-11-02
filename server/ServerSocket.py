@@ -1,7 +1,4 @@
 from struct import pack, unpack
-from tkinter import messagebox
-import tkinter as tk
-from tkinter import ttk
 import socket
 import pickle
 import os
@@ -20,10 +17,6 @@ class ServerSocket(socket.socket):
         self.transfer_receive = None
         self.transfer_result = None
         self.monitor_window = None
-        self.display = False
-
-    def set_root_window(self, tk):
-        self.root_tk = tk
 
     def connect(self, address):
         super(ServerSocket, self).connect(address)
@@ -81,12 +74,10 @@ class ServerSocket(socket.socket):
             print("End transfer")
             self.transfer_send = None
 
-    def receive_item(self, root, display_progress=False):
+    def receive_item(self, root):
         flag = True
         relpath = None
 
-        self.display = display_progress
-        self.start_monitor("Receiving")
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((self.client_addr, 6969))
 
@@ -99,9 +90,6 @@ class ServerSocket(socket.socket):
                 try:
                     relpath = raw.strip().decode()
                     length = int(clientfile.readline())
-
-                    if self.display:
-                        self.info.set(f"Receiving {relpath}")
 
                     path = os.path.join(root, relpath)
 
@@ -127,8 +115,6 @@ class ServerSocket(socket.socket):
                     os.makedirs(os.path.dirname(path), exist_ok=True)
 
                     # Start write byte
-                    size = length
-                    receive = 0
                     with open(path, 'wb') as f:
                         while length:
                             chunk = min(length, MAX_TRANSFER)
@@ -139,28 +125,19 @@ class ServerSocket(socket.socket):
 
                             f.write(data)
                             length -= len(data)
-                            receive += len(data)
-                            if self.display:
-                                self.progress_bar['value'] = int(
-                                    receive / size * 100)
-                                self.monitor_window.update()
-
                         else:
                             continue
                 except:
                     flag = False
 
-        self.end_monitor()
         return relpath if not flag else None
 
-    def send_item(self, local_paths, remote_path, display_progress=False):
+    def send_item(self, local_paths, remote_path):
         if not self.start_transfer(remote_path):
             self.transfer_result = "Cannot start transfering"
             return
 
         assert self.transfer_send is not None
-        self.display = display_progress
-        self.start_monitor("Sending")
 
         self.transfer_receive, _ = self.transfer_send.accept()
         print("Connected")
@@ -173,7 +150,6 @@ class ServerSocket(socket.socket):
                 else:
                     self.send_file(root, file, '')
 
-        self.end_monitor()
         self.end_transfer()
 
     def send_folder(self, path, rel):
@@ -187,9 +163,7 @@ class ServerSocket(socket.socket):
             for file in files:
                 if not self.send_file(root, file, rel):
                     return False
-
             break
-
         return True
 
     def send_file(self, root, file, rel):
@@ -198,41 +172,24 @@ class ServerSocket(socket.socket):
         size = os.path.getsize(filename)
         flag = True
 
-        if self.display:
-            self.info.set(f"Sending {filename}")
-
         with open(filename, 'rb') as f:
             try:
                 self.transfer_receive.sendall(relpath.encode() + b'\n')
                 self.transfer_receive.sendall(f'{size}'.encode() + b'\n')
 
-                dup_flag = True
                 s = self.receive_obj()
 
-                if s[0] == "DUPLICATE":
-                    answer = messagebox.askyesnocancel(
-                        title='Duplicate File', message=f'{s[1]} existed. Do you want to overwrite it? \nPress No to make a copy, Cancel to skip this file.')
+                if s[0] == "NO":
+                    return
 
-                    if answer:
-                        self.send_obj(['OVERWRITE'])
-                    elif answer is None:
-                        self.send_obj(['NO'])
-                        dup_flag = False
-                    else:
-                        self.send_obj(['RENAME'])
+                sent = 0
+                while True:
+                    data = f.read(MAX_TRANSFER)
+                    if not data:
+                        break
 
-                if dup_flag:
-                    sent = 0
-                    while True:
-                        data = f.read(MAX_TRANSFER)
-                        if not data:
-                            break
-
-                        self.transfer_receive.sendall(data)
-                        sent += len(data)
-                        if self.display:
-                            self.progress_bar['value'] = int(sent / size * 100)
-                            self.monitor_window.update()
+                    self.transfer_receive.sendall(data)
+                    sent += len(data)
 
             except:
                 self.transfer_result = 'Cannot transfer {}'.format(relpath)
@@ -250,44 +207,3 @@ class ServerSocket(socket.socket):
 
         except:
             pass
-
-    def start_monitor(self, title):
-        if self.display:
-            self.monitor_window = tk.Toplevel(self.root_tk)
-            self.monitor_window.title = title
-            self.monitor_window.resizable(0, 0)
-            self.root_tk.wm_attributes("-disabled", True)
-
-            window_height = 60
-            window_width = 420
-
-            screen_width = self.monitor_window.winfo_screenwidth()
-            screen_height = self.monitor_window.winfo_screenheight()
-
-            x_cordinate = int((screen_width/2) - (window_width/2))
-            y_cordinate = int((screen_height/2) - (window_height/2))
-
-            self.monitor_window.geometry(
-                "{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
-
-            self.info = tk.StringVar(
-                self.monitor_window, value="Waiting for connect....")
-
-            label = ttk.Label(self.monitor_window, textvariable=self.info)
-            label.pack()
-
-            self.progress_bar = ttk.Progressbar(self.monitor_window, orient=tk.HORIZONTAL,
-                                                length=400, mode='determinate')
-            self.progress_bar.pack(expand=True, padx=10, pady=10)
-
-            self.monitor_window.update()
-
-    def end_monitor(self):
-        self.display = False
-        if self.monitor_window is not None:
-            try:
-                self.root_tk.wm_attributes("-disabled", False)
-                self.monitor_window.destroy()
-
-            finally:
-                self.monitor_window = None

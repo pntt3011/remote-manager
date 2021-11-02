@@ -110,21 +110,24 @@ class BaseSocket(socket.socket):
 
                     # Check if path exists
                     if os.path.exists(path):
-                        self.send_obj(["DUPLICATE", path])
-                        s = self.receive_obj()
-
-                        if s[0] == "NO":
-                            continue
-
-                        if s[0] == "RENAME":
+                        answer = messagebox.askyesnocancel(
+                            title='Duplicate File', message=f'{path} existed. Do you want to overwrite it? \nPress No to make a copy, Cancel to skip this file.')
+                        
+                        if answer:
+                            self.send_obj(['YES'])
+                        elif answer is None:
+                            self.send_obj(['NO'])
+                        else:
                             while True:
                                 dir, name = os.path.split(path)
                                 name = "Copy of " + name
                                 path = os.path.join(dir, name)
                                 if not os.path.exists(path):
                                     break
+                            self.send_obj(['YES'])
+
                     else:
-                        self.send_obj(["NOT DUPLICATE"])
+                        self.send_obj(["YES"])
 
                     print(f"Receiving {path}")
                     os.makedirs(os.path.dirname(path), exist_ok=True)
