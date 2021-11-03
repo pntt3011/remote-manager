@@ -47,23 +47,26 @@ class ScreenSharing:
         else:
             self.control_button_click()
 
+    def setup_screen_frame(self):
+        self.screen_frame = tk.Toplevel(self.parent)
+        self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_screen)
+        self.screen_frame.title('Screen')
+        self.picture = ttk.Label(self.screen_frame, anchor=tk.CENTER)
+        self.picture.pack(fill='both', expand=True)
+        self.screen_frame.bind('<Configure>', self.handle_resize)
+
     def handle_share_button(self):
         if self.running.get():
             self.share_button.configure(text='Stop screen capturing')
             
             if self.screen_frame is None:
-                self.screen_frame = tk.Toplevel(self.parent)
-                self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_screen)
-                self.screen_frame.title('Screen')
-                self.picture = ttk.Label(self.screen_frame)
-                self.picture.pack(fill='both', expand=True)
+                self.setup_screen_frame()
                 self.setup_remote_control()
             else:
                 self.screen_frame.deiconify()
             
             self.screen_frame.state('zoomed')
             self.new_state = 'normal'
-            self.screen_frame.bind('<Configure>', self.handle_resize)
             self.start_button_click()
 
         else:
