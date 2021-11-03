@@ -87,10 +87,12 @@ class ScreenSharing:
 
     def set_res(self):
         self.picture.update()
-        x_res = self.picture.winfo_width()
-        y_res = self.picture.winfo_height()
-        self.x_res = min(x_res, int(16/9 * y_res))
-        self.y_res = min(y_res, int(9/16 * x_res))
+        self.x_orig = self.picture.winfo_width()
+        self.y_orig = self.picture.winfo_height()
+        self.x_res = min(self.x_orig, int(16/9 * self.y_orig))
+        self.y_res = min(self.y_orig, int(9/16 * self.x_orig))
+        self.x_offset = (self.x_orig - self.x_res) / 2
+        self.y_offset = (self.y_orig - self.y_res) / 2
         # print(self.x_res, 'x', self.y_res)
         if not self.conn.client.send_obj("SET_RESOLUTION"):
             return False
@@ -133,10 +135,12 @@ class ScreenSharing:
     def motion(self, event):
         if self.control_flag and self.sender is not None:
             if FPS * (time.time() - self.clock) >= 1:
-                x = repr(min(event.x / self.x_res, 1.))
-                y = repr(min(event.y / self.y_res, 1.))
-                self.conn.client_io.send_obj(["MOUSE_MOVE", [x, y]])
-                self.clock = time.time()
+                x = (event.x - self.x_offset) / self.x_res
+                y = (event.y - self.y_offset) / self.y_res
+
+                if x >= 0 and x <= 1 and y >= 0 and y <= 1:
+                    self.conn.client_io.send_obj(["MOUSE_MOVE", [repr(x), repr(y)]])
+                    self.clock = time.time()
 
     def start_button_click(self):
         if not self.set_res():
