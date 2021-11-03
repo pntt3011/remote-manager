@@ -9,7 +9,7 @@ class BaseControl:
         self.run_frame = ttk.LabelFrame(
             self.parent, text='Run', padding=(5, 5)
         )
-        self.entry = MyEntry(self.run_frame, '', '', justify='center', font=("-size", 13))
+        self.entry = MyEntry(self.run_frame, '', justify='center')
         self.run_button = ttk.Button(
             self.run_frame, text='Start', style='Accent.TButton', command=self.run_button_click
         )

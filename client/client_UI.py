@@ -7,6 +7,7 @@ from connection import Connection
 from process_control import ProcessControl
 from key_hooker import KeyHooker
 from network_info import NetworkInfo
+from registry_editor import RegistryEditor
 from application_control import ApplicationControl
 
 class ClientUI(ttk.Frame):
@@ -66,9 +67,15 @@ class ClientUI(ttk.Frame):
         self.power_control = PowerControl(self.power_tab, self.connection)
         self.power_control.setup_UI()
 
+        # Registry editor tab
+        self.registry_editor_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.registry_editor_tab, text='Registry\neditor')
+        self.registry_editor = RegistryEditor(self.registry_editor_tab, self.connection)
+        self.registry_editor.setup_UI()
+
         self.widgets = [self.connection, self.process_control, self.app_control,
                         self.key_hooker, self.network_info, self.file_sharing,
-                        self.screen_sharing]
+                        self.screen_sharing, self.registry_editor]
         self.network_info.setup_UI()
 
         self.set_state_widgets('disabled')

@@ -13,6 +13,7 @@ class ApplicationControl(BaseControl):
         self.list.heading('name', text='Application Name', anchor=tk.W)
         self.list.heading('id', text='Appliction ID', anchor=tk.W)
         self.list.heading('thread_count', text='Thread Count', anchor=tk.W)
+        self.entry.set_alt('Enter application name')
 
     def get_list(self):
         if not self.conn.client.send_obj('XEM_APP'):

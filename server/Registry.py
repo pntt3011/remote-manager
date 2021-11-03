@@ -65,6 +65,7 @@ class Registry:
         value_name = data[2]
         value = data[3]
         type_value = data[4]
+        print(data)
 
         if "\\" not in link:
             self.server.send_obj("Error")

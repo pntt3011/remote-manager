@@ -13,6 +13,7 @@ class ProcessControl(BaseControl):
         self.list.heading('name', text='Process Name', anchor=tk.W)
         self.list.heading('id', text='Process ID', anchor=tk.W)
         self.list.heading('thread_count', text='Thread Count', anchor=tk.W)
+        self.entry.set_alt('Enter process name')
 
     def get_list(self):
         if not self.conn.client.send_obj('XEM_PROCESS'):

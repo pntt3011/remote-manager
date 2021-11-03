@@ -2,12 +2,11 @@ from tkinter import ttk
 import tkinter as tk
 
 class MyEntry(ttk.Entry):
-    def __init__(self, parent, text, alt, **kwargs):
+    def __init__(self, parent, alt, **kwargs):
         super().__init__(parent, **kwargs)
-        self.text = text
         self.alt = alt
         self.config(foreground='grey')
-        self.insert(0, self.text)
+        self.insert(0, self.alt)
 
         def txt_in(e):
             ### Tkinter unknown
@@ -22,10 +21,13 @@ class MyEntry(ttk.Entry):
             if self.get() == '':
                 self.delete(0, 'end')
                 self.config(foreground='grey')
-                self.insert(0, self.text)
+                self.insert(0, self.alt)
 
         self.bind("<FocusIn>", txt_in)
         self.bind("<FocusOut>", txt_out)
+
+    def set_alt(self, alt):
+        self.alt = alt
 
     def get(self):
         if str(self.cget('foreground')) == 'grey':

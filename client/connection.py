@@ -19,7 +19,7 @@ class Connection:
         self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
         self.parent = parent
         self.ip_entry = MyEntry(
-            self.parent, 'Enter host ip', '', justify='center', font=("Segoe Ui", 13),
+            self.parent, 'Enter host ip', justify='center', font=("Segoe Ui", 13),
         )
         self.connect_button = ttk.Button(parent,
                                          text='Connect',

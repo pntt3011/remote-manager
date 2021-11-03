@@ -35,7 +35,7 @@ def resource_path(relative_path):
 
 class ServerApp:
     def __init__(self):
-        if True:  # self.is_admin():
+        if  self.is_admin():
             self.setup()
 
         else:
