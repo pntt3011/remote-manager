@@ -146,8 +146,8 @@ class ServerIO:
         self.w, self.h = pyautogui.size()
         self.dict = {
             "MOUSE_MOVE": self.mouse_move,
-            "KEY_PRESS": lambda s: self.keyboard.press(key_map[s]),
-            "KEY_RELEASE": lambda s: self.keyboard.release(key_map[s]),
+            "KEY_PRESS": lambda s: self.key_press(s),
+            "KEY_RELEASE": lambda s: self.key_release(s),
             "MOUSE_UP": lambda s: mouse.release(button=s),
             "MOUSE_DOWN": lambda s: mouse.press(button=s)
         }
@@ -178,6 +178,14 @@ class ServerIO:
         x = int(float(s[0]) * self.w)
         y = int(float(s[1]) * self.h)
         mouse.move(x, y)
+
+    def key_press(self, s):
+        if s in key_map:
+            self.keyboard.press(key_map[s])
+
+    def key_release(self, s):
+        if s in key_map:
+            self.keyboard.release(key_map[s])
 
     def stop(self):
         self.flag = False
