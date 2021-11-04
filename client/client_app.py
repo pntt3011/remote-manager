@@ -15,7 +15,7 @@ def is_admin():
 
 if __name__ == '__main__':
 
-    if True:  # is_admin():
+    if is_admin():
         root = tk.Tk()
         scaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
         root.tk.call('tk', 'scaling', scaleFactor)
