@@ -147,9 +147,9 @@ class StreamingServer:
             break_loop = False
 
             while len(data) < payload_size:
-                received = connection.recv(4096)
-
-                if received == b'':
+                try:
+                    received = connection.recv(4096)
+                except:
                     connection.close()
                     self.__used_slots -= 1
                     break_loop = True

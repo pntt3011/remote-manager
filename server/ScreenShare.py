@@ -28,7 +28,10 @@ class ScreenShare:
 
     def client_streaming(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((self.host, self.port))
+        try:
+            self.client_socket.connect((self.host, self.port))
+        except:
+            self.stop_stream()
 
         with mss() as sct:
             monitor = {"top": 0, "left": 0, "width": self.w, "height": self.h}
@@ -53,6 +56,7 @@ class ScreenShare:
             threading.Thread(target=self.client_streaming, daemon=True).start()
 
     def stop_stream(self):
-        if self.running:
-            self.running = False
+        try:
             self.client_socket.close()
+        finally:
+            self.running = False

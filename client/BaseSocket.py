@@ -248,8 +248,6 @@ class BaseSocket(socket.socket):
         return flag
 
     def close(self):
-        assert self.client != None
-
         try:
             self.client.shutdown(socket.SHUT_RDWR)
             self.client.close()

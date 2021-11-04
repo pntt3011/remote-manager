@@ -1,12 +1,14 @@
 from pynput.keyboard import Key, Controller
 from ServerSocket import ServerSocket
 import pyautogui
-import mouse
+import win32api
+import win32con
 import socket
 
 HOST = ""
 PORT = 5656
 ADDR = (HOST, PORT)
+
 
 key_map = {
     'Escape': Key.esc,
@@ -144,12 +146,13 @@ class ServerIO:
     def __init__(self):
         self.keyboard = Controller()
         self.w, self.h = pyautogui.size()
+        self.x, self.y = 0, 0
         self.dict = {
             "MOUSE_MOVE": self.mouse_move,
-            "KEY_PRESS": lambda s: self.key_press(s),
-            "KEY_RELEASE": lambda s: self.key_release(s),
-            "MOUSE_UP": lambda s: mouse.release(button=s),
-            "MOUSE_DOWN": lambda s: mouse.press(button=s)
+            "KEY_PRESS": self.key_press,
+            "KEY_RELEASE": self.key_release,
+            "MOUSE_UP": self.mouse_release,
+            "MOUSE_DOWN": self.mouse_press
         }
         self.open_server()
 
@@ -172,12 +175,43 @@ class ServerIO:
                     break
 
                 if s[0] in self.dict:
+                    if s[0] != "MOUSE_MOVE":
+                        print(s[0])
                     self.dict[s[0]](s[1])
 
     def mouse_move(self, s):
-        x = int(float(s[0]) * self.w)
-        y = int(float(s[1]) * self.h)
-        mouse.move(x, y)
+        self.x = int(float(s[0]) * 65535.0)
+        self.y = int(float(s[1]) * 65535.0)
+        win32api.mouse_event(
+            win32con.MOUSEEVENTF_MOVE | 
+            win32con.MOUSEEVENTF_ABSOLUTE, 
+            self.x, self.y)
+
+    def mouse_press(self, s):
+        if s == "left":
+            win32api.mouse_event(
+                win32con.MOUSEEVENTF_LEFTDOWN |
+                win32con.MOUSEEVENTF_ABSOLUTE,
+                self.x, self.y)
+                
+        elif s == "right":
+            win32api.mouse_event(
+                win32con.MOUSEEVENTF_RIGHTDOWN |
+                win32con.MOUSEEVENTF_ABSOLUTE,
+                self.x, self.y)
+
+    def mouse_release(self, s):
+        if s == "left":
+            win32api.mouse_event(
+                win32con.MOUSEEVENTF_LEFTUP |
+                win32con.MOUSEEVENTF_ABSOLUTE,
+                self.x, self.y)
+
+        elif s == "right":
+            win32api.mouse_event(
+                win32con.MOUSEEVENTF_RIGHTUP |
+                win32con.MOUSEEVENTF_ABSOLUTE,
+                self.x, self.y)
 
     def key_press(self, s):
         if s in key_map:

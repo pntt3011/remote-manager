@@ -121,9 +121,6 @@ class ScreenSharing:
         return True
 
     def setup_remote_control(self):
-        self.picture.bind("<KeyPress>", self.keydown)
-        self.picture.bind("<KeyRelease>", self.keyup)
-
         self.picture.bind("<ButtonPress-1>", lambda e: self.mousedown("left"))
         self.picture.bind("<ButtonRelease-1>", lambda e: self.mouseup("left"))
 
@@ -131,6 +128,9 @@ class ScreenSharing:
         self.picture.bind("<ButtonRelease-3>", lambda e: self.mouseup("right"))
 
         self.picture.bind("<Motion>", self.motion)
+
+        self.picture.bind("<KeyPress>", lambda e: self.keydown(e))
+        self.picture.bind("<KeyRelease>", lambda e: self.keyup(e))
 
     def keydown(self, event):
         if self.control_flag and self.sender is not None:
@@ -142,6 +142,7 @@ class ScreenSharing:
 
     def mousedown(self, m):
         if self.control_flag and self.sender is not None:
+            self.picture.focus_set()
             self.conn.client_io.send_obj(["MOUSE_DOWN", m])
 
     def mouseup(self, m):
