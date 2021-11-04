@@ -1,7 +1,6 @@
 from tkinter import image_names, ttk, messagebox
 from tkinter import scrolledtext as tkst
 import tkinter as tk
-from tkinter.constants import COMMAND
 from my_entry import MyEntry
 from tkinter import filedialog
 

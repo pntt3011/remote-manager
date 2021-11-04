@@ -1,16 +1,11 @@
 from tkinter import messagebox
-from tkinter.constants import ANCHOR
-from tkinter.messagebox import NO
-from typing import Text
 
 from PIL import ImageTk
+from path_finding import resource_path
 from streaming_server import StreamingServer
-from my_client import Client
-from tkinter import font, ttk
+from tkinter import ttk
 import time
 import tkinter as tk
-from ttkbootstrap import Style
-import os
 
 FPS = 30
 
@@ -32,15 +27,9 @@ class ScreenSharing:
             self.parent, text='Start controlling', style='Toolbutton',
             variable=self.controlling, command=self.handle_control_button,
         )
-        self.stop_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/stop_icon.png'
-        )
-        self.screen_sharing_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/screen_sharing_icon.png'
-        )
-        self.control_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/control_icon.png'
-        )
+        self.stop_icon = tk.PhotoImage(file=resource_path('res/stop_icon.png'))
+        self.screen_sharing_icon = tk.PhotoImage(file=resource_path('res/screen_sharing_icon.png'))
+        self.control_icon = tk.PhotoImage(file=resource_path('res/control_icon.png'))
         self.set_stop_state_share()
         self.set_stop_state_control()
         self.control_flag = False
@@ -61,9 +50,7 @@ class ScreenSharing:
 
     def setup_screen_frame(self):
         self.screen_frame = tk.Toplevel(self.parent)
-        self.screen_frame.iconbitmap(
-            os.path.dirname(os.path.realpath(__file__)) + './res/app_icon.ico'
-        )
+        self.screen_frame.iconbitmap(resource_path('res/app_icon.ico'))
         self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_screen)
         self.screen_frame.title('Screen')
         self.picture = ttk.Label(self.screen_frame, anchor=tk.CENTER)

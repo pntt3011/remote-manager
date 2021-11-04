@@ -1,6 +1,3 @@
-from enum import Flag
-from os import stat_result
-import threading
 from tkinter import ttk, messagebox
 import tkinter.scrolledtext as tkst
 import tkinter as tk

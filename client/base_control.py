@@ -1,4 +1,4 @@
-from tkinter import Event, StringVar, Toplevel, ttk
+from tkinter import ttk
 import tkinter as tk
 from my_entry import MyEntry
 
