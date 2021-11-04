@@ -15,10 +15,11 @@ if __name__ == '__main__':
 
     if True:  # is_admin():
         root = tk.Tk()
-        root.geometry('600x400')
+        root.geometry('600x520')
         root.resizable(False, False)
         # root.state('zoomed')
         root.title('Client')
+        root.iconbitmap(os.path.dirname(os.path.realpath(__file__)) + './res/app_icon.ico')
 
         # Set the theme
         # root.tk.call("source", os.path.dirname(

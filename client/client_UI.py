@@ -1,4 +1,5 @@
 from tkinter import ttk, messagebox
+from typing import Counter
 from win32process import SetProcessAffinityMask
 from power_control import PowerControl
 from screen_sharing import ScreenSharing
@@ -9,6 +10,8 @@ from key_hooker import KeyHooker
 from network_info import NetworkInfo
 from registry_editor import RegistryEditor
 from application_control import ApplicationControl
+import tkinter as tk
+import os
 
 class ClientUI(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -29,47 +32,77 @@ class ClientUI(ttk.Frame):
 
         # Connection tab
         self.connection_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.connection_tab, text='Connect\n')
+        self.connect_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/connect_icon.png'
+        )
+        self.notebook.add(
+            self.connection_tab, text='Connect\n', image=self.connect_icon, compound=tk.TOP)
         self.connection = Connection(self.connection_tab, self)
         self.connection.setup_UI()
 
         # Process control tab
         self.process_control_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.process_control_tab, text='Process\n')
+        self.process_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/process_icon.png'
+        )
+        self.notebook.add(self.process_control_tab, text='Process\n',
+                          image=self.process_icon, compound=tk.TOP)
         self.process_control = ProcessControl(self.connection, self.process_control_tab)
         self.process_control.setup_UI()
         
         # Application control tab
         self.app_control_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.app_control_tab, text='Application\n')
+        self.application_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/application_icon.png'
+        )
+        self.notebook.add(self.app_control_tab, text='Application\n',
+                          image=self.application_icon, compound=tk.TOP)
         self.app_control = ApplicationControl(self.connection, self.app_control_tab)
         self.app_control.setup_UI()
         
         # Sharing tab
         self.sharing_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.sharing_tab, text='Share\n')
+        self.share_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/share_icon.png'
+        )
+        self.notebook.add(self.sharing_tab, text='Share\n', image=self.share_icon, compound=tk.TOP)
         self.setup_sharing_tab()
 
         # Keyboard control tab
         self.keyboard_control_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.keyboard_control_tab, text='Keyboard\n')
+        self.keyboard_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/keyboard_icon.png'
+        )
+        self.notebook.add(self.keyboard_control_tab, text='Keyboard\n',
+                          image=self.keyboard_icon, compound=tk.TOP)
         self.key_hooker = KeyHooker(self.keyboard_control_tab, self.connection)
         self.key_hooker.setup_UI()
 
         # MAC collecting tab
         self.network_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.network_tab, text='MAC\naddress')
+        self.mac_address_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/mac_address_icon.png'
+        )
+        self.notebook.add(self.network_tab, text='MAC\naddress',
+                          image=self.mac_address_icon, compound=tk.TOP)
         self.network_info = NetworkInfo(self.network_tab, self.connection)
 
         # Power control tab
         self.power_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.power_tab, text='Power\n')
+        self.power_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/power_icon.png'
+        )
+        self.notebook.add(self.power_tab, text='Power\n', image=self.power_icon, compound=tk.TOP)
         self.power_control = PowerControl(self.power_tab, self.connection)
         self.power_control.setup_UI()
 
         # Registry editor tab
         self.registry_editor_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.registry_editor_tab, text='Registry\neditor')
+        self.registry_editor_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/registry_editor_icon.png'
+        )
+        self.notebook.add(self.registry_editor_tab, text='Registry\neditor',
+                          image=self.registry_editor_icon, compound=tk.TOP)
         self.registry_editor = RegistryEditor(self.registry_editor_tab, self.connection)
         self.registry_editor.setup_UI()
 

@@ -2,7 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 from RemoteFrame import RemoteFrame
 from LocalFrame import LocalFrame
-
+import os
 class FileSharing:
     def __init__(self, parent, conn):
         self.parent = parent
@@ -15,13 +15,23 @@ class FileSharing:
         self.file_frame = None
         self.remote_frame = None
         self.local_frame = None
+        self.file_sharing_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/file_sharing_icon.png'
+        )
+        self.stop_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/stop_icon.png'
+        )
+        self.set_stop_state_share()
     
     def handle_share_button(self):
         if self.sharing.get():
-            self.share_button.configure(text='Stop file sharing')
+            self.set_start_state_share()
             
             if self.file_frame is None:
                 self.file_frame = tk.Toplevel(self.parent)
+                self.file_frame.iconbitmap(
+                    os.path.dirname(os.path.realpath(__file__)) + './res/app_icon.ico'
+                )
                 self.file_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_sharing)
                 self.file_frame.title('File sharing')
                 self.clipboard = [None] * 2
@@ -45,8 +55,20 @@ class FileSharing:
             self.file_frame.bind('<Configure>', self.handle_resize)
 
         else:
-            self.share_button.configure(text='Start file sharing')
+            self.set_stop_state_share()
             self.file_frame.withdraw()
+
+    def set_start_state_share(self):
+        self.share_button.configure(text='Stop file sharing',
+                                    image=self.stop_icon,
+                                    compound=tk.LEFT)
+        self.sharing.set(True)
+
+    def set_stop_state_share(self):
+        self.share_button.configure(text='Start file sharing',
+                                    image=self.file_sharing_icon,
+                                    compound=tk.LEFT)
+        self.sharing.set(False)
 
     def handle_resize(self, event):
         self.old_state = self.new_state # assign the old state value
@@ -59,8 +81,7 @@ class FileSharing:
         self.handle_share_button()
 
     def handle_lost_connection(self):
-        self.sharing.set(False)
-        self.share_button.configure(text='Start file sharing')
+        self.set_stop_state_share()
         if self.file_frame is not None:
             self.file_frame.destroy()
             self.file_frame = None

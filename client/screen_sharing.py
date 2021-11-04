@@ -1,4 +1,5 @@
 from tkinter import messagebox
+from tkinter.constants import ANCHOR
 from tkinter.messagebox import NO
 from typing import Text
 
@@ -9,6 +10,7 @@ from tkinter import font, ttk
 import time
 import tkinter as tk
 from ttkbootstrap import Style
+import os
 
 FPS = 30
 
@@ -30,7 +32,17 @@ class ScreenSharing:
             self.parent, text='Start controlling', style='Toolbutton',
             variable=self.controlling, command=self.handle_control_button,
         )
-
+        self.stop_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/stop_icon.png'
+        )
+        self.screen_sharing_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/screen_sharing_icon.png'
+        )
+        self.control_icon = tk.PhotoImage(
+            file=os.path.dirname(os.path.realpath(__file__)) + './res/control_icon.png'
+        )
+        self.set_stop_state_share()
+        self.set_stop_state_control()
         self.control_flag = False
         self.sender = None
         self.x_res = None
@@ -49,6 +61,9 @@ class ScreenSharing:
 
     def setup_screen_frame(self):
         self.screen_frame = tk.Toplevel(self.parent)
+        self.screen_frame.iconbitmap(
+            os.path.dirname(os.path.realpath(__file__)) + './res/app_icon.ico'
+        )
         self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_screen)
         self.screen_frame.title('Screen')
         self.picture = ttk.Label(self.screen_frame, anchor=tk.CENTER)
@@ -57,7 +72,7 @@ class ScreenSharing:
 
     def handle_share_button(self):
         if self.running.get():
-            self.share_button.configure(text='Stop screen capturing')
+            self.set_start_state_share()
             
             if self.screen_frame is None:
                 self.setup_screen_frame()
@@ -73,7 +88,7 @@ class ScreenSharing:
             if self.controlling.get():
                 self.controlling.set(False)
                 self.handle_control_button()
-            self.share_button.configure(text='Start screen capturing')
+            self.set_stop_state_share()
             self.screen_frame.withdraw()
             self.stop_button_click()
 
@@ -84,6 +99,17 @@ class ScreenSharing:
             self.screen_frame.wm_geometry('960x540')
         self.set_res()
         
+    def set_start_state_share(self):
+        self.share_button.configure(text='Stop screen capturing',
+                                    image=self.stop_icon,
+                                    compound=tk.LEFT)
+        self.running.set(True)
+
+    def set_stop_state_share(self):
+        self.share_button.configure(text='Start screen capturing',
+                                    image=self.screen_sharing_icon,
+                                    compound=tk.LEFT)
+        self.running.set(False)
 
     def set_res(self):
         self.picture.update()
@@ -162,9 +188,8 @@ class ScreenSharing:
             self.sender = None
 
     def handle_lost_connection(self):
-        self.running.set(False)
-        self.share_button.configure(text='Start screen capturing')
-        self.controlling.set(False)
+        self.set_stop_state_share()
+        self.set_stop_state_control()
         self.share_button.configure(text='Start screen controlling')
         if self.screen_frame is not None:
             self.screen_frame.destroy()
@@ -183,4 +208,16 @@ class ScreenSharing:
             self.picture.focus_set()
         else:
             self.control_button.configure(text="Start controlling")
+
+    def set_start_state_control(self):
+        self.control_button.configure(text="Stop controlling",
+                                      image=self.stop_icon,
+                                      compound=tk.LEFT)
+        self.controlling.set(True)
+
+    def set_stop_state_control(self):
+        self.control_button.configure(text="Start controlling",
+                                      image=self.control_icon,
+                                      compound=tk.LEFT)
+        self.controlling.set(False)
 

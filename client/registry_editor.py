@@ -183,7 +183,7 @@ class RegistryEditor:
             row=0, column=1, padx=(5, 5), pady=(5, 5), sticky='nsew'
         )
         self.import_text.grid(
-            row=1, column=0, columnspan=2, padx=(2, 2), pady=(2, 2), sticky='nsew'
+            row=1, column=0, columnspan=3, padx=(2, 2), pady=(2, 2), sticky='nsew'
         )
         self.function_type.grid(
             row=0, column=0, columnspan=2, padx=(2, 2), pady=(2, 2), sticky='nsew'
