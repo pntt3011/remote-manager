@@ -1,6 +1,7 @@
 from tkinter import image_names, ttk, messagebox
 from tkinter import scrolledtext as tkst
 import tkinter as tk
+from typing import Text
 from my_entry import MyEntry
 from tkinter import filedialog
 
@@ -35,7 +36,7 @@ class RegistryEditor:
         self.edit_value_frame = ttk.LabelFrame(self.edit_tab, text='Edit registry value')
         self.paned_windows.add(self.edit_value_frame)
         self.function_type = ttk.Menubutton(
-            self.edit_value_frame, text='Fucntion'
+            self.edit_value_frame, text='Function'
         )
         self.edit_button = ttk.Button(
             self.edit_value_frame, text='Send', command=self.handle_edit_button
@@ -66,7 +67,8 @@ class RegistryEditor:
         for type in ['String', 'Binary', 'DWORD', 'Multi-String', 'Expandable string']:
             self.type_menu.add_radiobutton(label=type,
                                            value=type,
-                                           variable=self.type_var)
+                                           variable=self.type_var,
+                                           command=self.handle_choose_type)
         self.value_type['menu'] = self.type_menu
         self.log_frame = ttk.LabelFrame(self.edit_tab, text='Log')
         self.paned_windows.add(self.log_frame)
@@ -74,6 +76,7 @@ class RegistryEditor:
 
     def handle_choose_function(self):
         s = self.function_var.get()
+        self.function_type.configure(text=s)
         self.name_value_entry.grid_remove()
         self.value_type.grid_remove()
         self.value_entry.grid_remove()
@@ -83,6 +86,10 @@ class RegistryEditor:
             self.name_value_entry.grid()
             self.value_entry.grid()
             self.value_type.grid()
+
+    def handle_choose_type(self):
+        s = self.type_var.get()
+        self.value_type.configure(text=s)
 
     def add_edit_log(self, s):
         self.log_text.config(state=tk.NORMAL)
@@ -130,10 +137,13 @@ class RegistryEditor:
         try:
             f = open(filename, mode='r', encoding='utf-8')
             s = f.read()
+            f.close()
         except UnicodeDecodeError:
             f = open(filename, mode='r', encoding='utf-16')
             s = f.read()
-        f.close()
+            f.close()
+        except:
+            s = ''
         self.import_text.delete(1.0, tk.END)
         self.import_text.insert(tk.END, s)
 
@@ -152,9 +162,11 @@ class RegistryEditor:
     def handle_lost_connection(self):
         self.import_text.delete(1.0, tk.END)
         self.function_var.set('')
+        self.function_type.configure(text='Function')
         self.path_entry.delete(0, tk.END)
         self.name_value_entry.delete(0, tk.END)
         self.value_entry.delete(0, tk.END)
+        self.value_type.configure(text='Type')
         self.type_var.set('')
         self.handle_clear_button()
 

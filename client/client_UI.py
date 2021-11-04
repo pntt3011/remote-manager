@@ -27,6 +27,7 @@ class ClientUI(ttk.Frame):
         self.widgets_frame.grid(row=1, column=0, sticky='nsew')
         self.notebook = ttk.Notebook(self.widgets_frame)
         self.notebook.pack(fill='both', expand=True)
+        self.notebook.bind('<<NotebookTabChanged>>', self.handle_tab_change)
 
         # Connection tab
         self.connection_tab = ttk.Frame(self.notebook)
@@ -68,9 +69,9 @@ class ClientUI(ttk.Frame):
 
         # MAC collecting tab
         self.network_tab = ttk.Frame(self.notebook)
-        self.mac_address_icon = tk.PhotoImage(file=resource_path('res/mac_address_icon.png'))
+        self.network_icon = tk.PhotoImage(file=resource_path('res/network_icon.png'))
         self.notebook.add(self.network_tab, text='Network',
-                          image=self.mac_address_icon, compound=tk.TOP)
+                          image=self.network_icon, compound=tk.TOP)
         self.network_info = NetworkInfo(self.network_tab, self.connection)
 
         # Power control tab
@@ -94,6 +95,11 @@ class ClientUI(ttk.Frame):
         self.network_info.setup_UI()
 
         self.set_state_widgets('disabled')
+
+    def handle_tab_change(self, event):
+        tab = event.widget.tab('current')['text']
+        if tab == 'Network':
+            self.network_info.get_MAC()
 
     def set_state_widgets(self, state):
         for i in range(1, self.notebook.index('end')):
@@ -134,9 +140,9 @@ class ClientUI(ttk.Frame):
         self.sharing_tab.rowconfigure(2, weight=1)
         self.sharing_tab.rowconfigure(3, weight=1)
         self.sharing_tab.rowconfigure(4, weight=25)
-        self.sharing_tab.columnconfigure(0, weight=3)
+        self.sharing_tab.columnconfigure(0, weight=10)
         self.sharing_tab.columnconfigure(1, weight=1)
-        self.sharing_tab.columnconfigure(2, weight=3)
+        self.sharing_tab.columnconfigure(2, weight=10)
         self.screen_sharing.share_button.grid(
             row=1, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )

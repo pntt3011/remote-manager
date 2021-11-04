@@ -5,9 +5,6 @@ class NetworkInfo:
     def __init__(self, parent, conn):
         self.parent = parent
         self.conn = conn
-        self.button = ttk.Button(
-            self.parent, text='View MAC address', command=self.get_MAC
-        )
         self.info_frame = ttk.LabelFrame(self.parent, text='MAC address', padding=(5, 5))
         self.scrollbar = ttk.Scrollbar(self.info_frame)
         self.list = ttk.Treeview(
@@ -40,20 +37,7 @@ class NetworkInfo:
             idx += 1
 
     def setup_UI(self):
-        # Setup grid
-        self.parent.rowconfigure(index=0, weight=1)
-        self.parent.rowconfigure(index=1, weight=10)
-        self.parent.columnconfigure(index=0, weight=20)
-        self.parent.columnconfigure(index=1, weight=1)
-        self.parent.columnconfigure(index=2, weight=20)
-
-        # Put tkinter widgets into grid
-        self.button.grid(
-            row=0, column=1, padx=(5, 5), pady=(5, 0), sticky="nsew"
-        )
-        self.info_frame.grid(
-            row=1, column=0, columnspan=3, padx=(5, 5), pady=(5, 5), sticky="nsew"
-        )
+        self.info_frame.pack(fill='both', expand=True)
         self.scrollbar.pack(side="right", fill="y")
         self.list.pack(fill='both', expand=True)
 

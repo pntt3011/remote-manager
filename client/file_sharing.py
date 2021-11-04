@@ -1,5 +1,6 @@
 from tkinter import ttk
 import tkinter as tk
+from tkinter.constants import ANCHOR, LEFT
 from RemoteFrame import RemoteFrame
 from LocalFrame import LocalFrame
 from path_finding import resource_path
@@ -9,9 +10,11 @@ class FileSharing:
         self.parent = parent
         self.connection = conn
         self.sharing = tk.IntVar()
-        self.share_button = ttk.Checkbutton(
-            self.parent, text='Start file sharing', style='Toolbutton',
-            variable=self.sharing, command=self.handle_share_button,
+        self.my_style = ttk.Style()
+        self.my_style.configure('my.TButton', anchor=tk.W)
+        self.share_button = ttk.Button(
+            self.parent, text='Start file sharing', style='my.TButton',
+            command=self.handle_share_button,
         )
         self.file_frame = None
         self.remote_frame = None
@@ -21,13 +24,14 @@ class FileSharing:
         self.set_stop_state_share()
     
     def handle_share_button(self):
+        self.sharing.set(1 - self.sharing.get())
         if self.sharing.get():
             self.set_start_state_share()
             
             if self.file_frame is None:
                 self.file_frame = tk.Toplevel(self.parent)
                 self.file_frame.iconbitmap(resource_path('res/app_icon.ico'))
-                self.file_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_sharing)
+                self.file_frame.protocol("WM_DELETE_WINDOW", self.handle_share_button)
                 self.file_frame.title('File sharing')
                 self.clipboard = [None] * 2
 
@@ -70,10 +74,6 @@ class FileSharing:
         self.new_state = self.file_frame.state() # get the new state value
         if self.new_state == 'normal' and self.old_state == 'zoomed':
             self.file_frame.wm_geometry('960x540')
-
-    def handle_quit_sharing(self):
-        self.sharing.set(False)
-        self.handle_share_button()
 
     def handle_lost_connection(self):
         self.set_stop_state_share()

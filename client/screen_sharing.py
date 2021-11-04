@@ -15,18 +15,22 @@ class ScreenSharing:
         self.parent = parent
         self.UI_control = UI_control
         self.screen_frame = None
+
+        self.my_style = ttk.Style()
+        self.my_style.configure('my.TButton', anchor=tk.W)
         
         self.running = tk.IntVar(self.parent)
-        self.share_button = ttk.Checkbutton(
-            self.parent, text='Start screen capturing', style='Toolbutton',
-            variable=self.running, command=self.handle_share_button,
+        self.share_button = ttk.Button(
+            self.parent, text='Start screen capturing', style='my.TButton',
+            command=self.handle_share_button,
         )
 
         self.controlling  = tk.IntVar(self.parent)
-        self.control_button = ttk.Checkbutton(
-            self.parent, text='Start controlling', style='Toolbutton',
-            variable=self.controlling, command=self.handle_control_button,
+        self.control_button = ttk.Button(
+            self.parent, text='Start controlling', style='my.TButton',
+            command=self.handle_control_button,
         )
+
         self.stop_icon = tk.PhotoImage(file=resource_path('res/stop_icon.png'))
         self.screen_sharing_icon = tk.PhotoImage(file=resource_path('res/screen_sharing_icon.png'))
         self.control_icon = tk.PhotoImage(file=resource_path('res/control_icon.png'))
@@ -39,25 +43,29 @@ class ScreenSharing:
         self.clock = time.time()
 
     def handle_control_button(self):
+        self.controlling.set(1 - self.controlling.get())
         if self.controlling.get():
             if not self.running.get():
                 messagebox.showerror(message='Please start screen capturing first.')
                 self.controlling.set(False)
             else:
+                self.set_start_state_control()
                 self.control_button_click()
         else:
+            self.set_stop_state_control()
             self.control_button_click()
 
     def setup_screen_frame(self):
         self.screen_frame = tk.Toplevel(self.parent)
         self.screen_frame.iconbitmap(resource_path('res/app_icon.ico'))
-        self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_screen)
+        self.screen_frame.protocol("WM_DELETE_WINDOW", self.handle_share_button)
         self.screen_frame.title('Screen')
         self.picture = ttk.Label(self.screen_frame, anchor=tk.CENTER)
         self.picture.pack(fill='both', expand=True)
         self.screen_frame.bind('<Configure>', self.handle_resize)
 
     def handle_share_button(self):
+        self.running.set(1 - self.running.get())
         if self.running.get():
             self.set_start_state_share()
             
