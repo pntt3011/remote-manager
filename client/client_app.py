@@ -3,6 +3,8 @@ from ctypes import windll
 from ttkbootstrap import Style
 import tkinter as tk
 from path_finding import resource_path
+import ctypes
+
 
 def is_admin():
     try:
@@ -15,11 +17,14 @@ if __name__ == '__main__':
 
     if True:  # is_admin():
         root = tk.Tk()
-        root.geometry('600x520')
+        scaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+        root.tk.call('tk', 'scaling', scaleFactor)
+        root.geometry('610x520')
         root.resizable(False, False)
+
         # root.state('zoomed')
         root.title('Client')
-        root.iconbitmap(resource_path('res/app_icon.ico'))
+        root.iconbitmap(resource_path('res\\app_icon.ico'))
 
         # Set the theme
         # root.tk.call("source", os.path.dirname(
