@@ -1,4 +1,3 @@
-from os import name
 from socket import MsgFlag
 from win32api import SendMessage
 from base_control import BaseControl

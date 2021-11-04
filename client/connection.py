@@ -1,7 +1,4 @@
-from tkinter.constants import X
-from typing import Sized
 from socket import AF_INET, SOCK_STREAM
-from numpy.random import bit_generator
 from my_client import Client
 from tkinter import font, ttk
 from my_entry import MyEntry

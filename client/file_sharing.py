@@ -2,7 +2,8 @@ from tkinter import ttk
 import tkinter as tk
 from RemoteFrame import RemoteFrame
 from LocalFrame import LocalFrame
-import os
+from path_finding import resource_path
+
 class FileSharing:
     def __init__(self, parent, conn):
         self.parent = parent
@@ -15,12 +16,8 @@ class FileSharing:
         self.file_frame = None
         self.remote_frame = None
         self.local_frame = None
-        self.file_sharing_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/file_sharing_icon.png'
-        )
-        self.stop_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/stop_icon.png'
-        )
+        self.file_sharing_icon = tk.PhotoImage(file=resource_path('res/file_sharing_icon.png'))
+        self.stop_icon = tk.PhotoImage(file=resource_path('res/stop_icon.png'))
         self.set_stop_state_share()
     
     def handle_share_button(self):
@@ -29,9 +26,7 @@ class FileSharing:
             
             if self.file_frame is None:
                 self.file_frame = tk.Toplevel(self.parent)
-                self.file_frame.iconbitmap(
-                    os.path.dirname(os.path.realpath(__file__)) + './res/app_icon.ico'
-                )
+                self.file_frame.iconbitmap(resource_path('res/app_icon.ico'))
                 self.file_frame.protocol("WM_DELETE_WINDOW", self.handle_quit_sharing)
                 self.file_frame.title('File sharing')
                 self.clipboard = [None] * 2

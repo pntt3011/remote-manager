@@ -2,7 +2,7 @@ from client_UI import ClientUI
 from ctypes import windll
 from ttkbootstrap import Style
 import tkinter as tk
-import os
+from path_finding import resource_path
 
 def is_admin():
     try:
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         root.resizable(False, False)
         # root.state('zoomed')
         root.title('Client')
-        root.iconbitmap(os.path.dirname(os.path.realpath(__file__)) + './res/app_icon.ico')
+        root.iconbitmap(resource_path('res/app_icon.ico'))
 
         # Set the theme
         # root.tk.call("source", os.path.dirname(

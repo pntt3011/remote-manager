@@ -14,7 +14,6 @@ import pickle
 import struct
 import threading
 from PIL import ImageTk, Image
-from win32process import error
 
 
 class StreamingServer:

@@ -1,10 +1,5 @@
-import os
-from tkinter import ttk
-import tkinter as tk
-from tkinter import messagebox
 from BaseSocket import BaseSocket
 from struct import pack, unpack
-import socket
 import pickle
 
 # Chua xu li ket noi bi ngat dot ngot

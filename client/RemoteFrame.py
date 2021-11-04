@@ -3,7 +3,6 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import tkinter as tk
 import os
-import cv2
 
 
 class RemoteFrame(LocalFrame):

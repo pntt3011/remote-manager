@@ -1,21 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
 import os
+from path_finding import resource_path
 
 class PowerControl:
     def __init__(self, parent, conn):
         self.parent = parent
         self.conn = conn
-        self.shutdown_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/power_icon.png'
-        )
+        self.shutdown_icon = tk.PhotoImage(file=resource_path('res/power_icon.png'))
         self.shutdown_button = ttk.Button(
             self.parent, text='Shut down', command=self.handle_shutdown_button,
             image=self.shutdown_icon, compound=tk.LEFT
         )
-        self.logout_icon = tk.PhotoImage(
-            file=os.path.dirname(os.path.realpath(__file__)) + './res/logout_icon.png'
-        )
+        self.logout_icon = tk.PhotoImage(file=resource_path('res/logout_icon.png'))
         self.logout_button = ttk.Button(
             self.parent, text='Log out', command=self.handle_logout_button,
             image=self.logout_icon, compound=tk.LEFT
