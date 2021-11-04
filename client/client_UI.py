@@ -36,7 +36,7 @@ class ClientUI(ttk.Frame):
             file=os.path.dirname(os.path.realpath(__file__)) + './res/connect_icon.png'
         )
         self.notebook.add(
-            self.connection_tab, text='Connect\n', image=self.connect_icon, compound=tk.TOP)
+            self.connection_tab, text='Connect', image=self.connect_icon, compound=tk.TOP)
         self.connection = Connection(self.connection_tab, self)
         self.connection.setup_UI()
 
@@ -45,7 +45,7 @@ class ClientUI(ttk.Frame):
         self.process_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/process_icon.png'
         )
-        self.notebook.add(self.process_control_tab, text='Process\n',
+        self.notebook.add(self.process_control_tab, text='Process',
                           image=self.process_icon, compound=tk.TOP)
         self.process_control = ProcessControl(self.connection, self.process_control_tab)
         self.process_control.setup_UI()
@@ -55,7 +55,7 @@ class ClientUI(ttk.Frame):
         self.application_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/application_icon.png'
         )
-        self.notebook.add(self.app_control_tab, text='Application\n',
+        self.notebook.add(self.app_control_tab, text='Application',
                           image=self.application_icon, compound=tk.TOP)
         self.app_control = ApplicationControl(self.connection, self.app_control_tab)
         self.app_control.setup_UI()
@@ -65,7 +65,7 @@ class ClientUI(ttk.Frame):
         self.share_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/share_icon.png'
         )
-        self.notebook.add(self.sharing_tab, text='Share\n', image=self.share_icon, compound=tk.TOP)
+        self.notebook.add(self.sharing_tab, text='Share', image=self.share_icon, compound=tk.TOP)
         self.setup_sharing_tab()
 
         # Keyboard control tab
@@ -73,7 +73,7 @@ class ClientUI(ttk.Frame):
         self.keyboard_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/keyboard_icon.png'
         )
-        self.notebook.add(self.keyboard_control_tab, text='Keyboard\n',
+        self.notebook.add(self.keyboard_control_tab, text='Keyboard',
                           image=self.keyboard_icon, compound=tk.TOP)
         self.key_hooker = KeyHooker(self.keyboard_control_tab, self.connection)
         self.key_hooker.setup_UI()
@@ -83,7 +83,7 @@ class ClientUI(ttk.Frame):
         self.mac_address_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/mac_address_icon.png'
         )
-        self.notebook.add(self.network_tab, text='MAC\naddress',
+        self.notebook.add(self.network_tab, text='Network',
                           image=self.mac_address_icon, compound=tk.TOP)
         self.network_info = NetworkInfo(self.network_tab, self.connection)
 
@@ -92,7 +92,7 @@ class ClientUI(ttk.Frame):
         self.power_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/power_icon.png'
         )
-        self.notebook.add(self.power_tab, text='Power\n', image=self.power_icon, compound=tk.TOP)
+        self.notebook.add(self.power_tab, text='Power', image=self.power_icon, compound=tk.TOP)
         self.power_control = PowerControl(self.power_tab, self.connection)
         self.power_control.setup_UI()
 
@@ -101,7 +101,7 @@ class ClientUI(ttk.Frame):
         self.registry_editor_icon = tk.PhotoImage(
             file=os.path.dirname(os.path.realpath(__file__)) + './res/registry_editor_icon.png'
         )
-        self.notebook.add(self.registry_editor_tab, text='Registry\neditor',
+        self.notebook.add(self.registry_editor_tab, text='Registry',
                           image=self.registry_editor_icon, compound=tk.TOP)
         self.registry_editor = RegistryEditor(self.registry_editor_tab, self.connection)
         self.registry_editor.setup_UI()
