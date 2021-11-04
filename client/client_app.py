@@ -4,7 +4,7 @@ from ttkbootstrap import Style
 import tkinter as tk
 from path_finding import resource_path
 import ctypes
-
+import sys
 
 def is_admin():
     try:
