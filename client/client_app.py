@@ -17,7 +17,10 @@ if __name__ == '__main__':
 
     if is_admin():
         root = tk.Tk()
-        scaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+        try:
+            scaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+        except:
+            scaleFactor = 1.0
         root.tk.call('tk', 'scaling', scaleFactor)
         root.geometry('610x520')
         root.resizable(False, False)

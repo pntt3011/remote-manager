@@ -81,7 +81,6 @@ class ScreenSharing:
 
         else:
             if self.controlling.get():
-                self.controlling.set(False)
                 self.handle_control_button()
             self.set_stop_state_share()
             self.screen_frame.withdraw()
@@ -120,10 +119,6 @@ class ScreenSharing:
         if not self.conn.client.send_obj([self.x_res, self.y_res]):
             return False
         return True
-
-    def handle_quit_screen(self):
-        self.running.set(False)
-        self.handle_share_button()
 
     def setup_remote_control(self):
         self.picture.bind("<KeyPress>", self.keydown)
