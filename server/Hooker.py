@@ -138,7 +138,8 @@ class Hooker:
         return self.is_blocked
 
     def unblock(self):
-        self.is_blocked = not user32.BlockInput(False)
+        if self.is_blocked:
+            self.is_blocked = not user32.BlockInput(False)
         return not self.is_blocked
 
     def get_key_log(self):
