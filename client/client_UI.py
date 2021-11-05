@@ -112,22 +112,23 @@ class ClientUI(ttk.Frame):
         self.server_ip = self.connection.ip_entry.get()
         messagebox.showinfo(message='Successfully connect to server.')
         self.connection.client.set_root_window(self.root)
-        self.connection.off_button()
         self.set_state_widgets('normal')
 
-    def handle_lost_connection(self):
-        print('Lost connection')
-        
+    def handle_lost_connection(self, show_error=True):
+        if show_error:
+            print('Lost connection')
+        else:
+            print('Disconnected')
         # Call handle function of widgets
         for widget in self.widgets:
             widget.handle_lost_connection()
         
         self.connection.close()
         self.set_state_widgets('disabled')
-        self.connection.on_button()
-        messagebox.showerror(
-            message='Connection to server lost. Please try to connect again.'
-        )
+        if show_error:
+            messagebox.showerror(
+                message='Connection to server lost. Please try to connect again.'
+            )
 
     def setup_sharing_tab(self):
         self.screen_sharing = ScreenSharing(

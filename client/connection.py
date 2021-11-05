@@ -1,9 +1,11 @@
 from socket import AF_INET, SOCK_STREAM
+from tkinter.messagebox import showerror
 from my_client import Client
 from tkinter import font, ttk
 from my_entry import MyEntry
 from my_client import Client
 from BaseSocket import BaseSocket
+import tkinter as tk
 import gc
 
 IO_PORT = 5656
@@ -22,6 +24,7 @@ class Connection:
                                          text='Connect',
                                          style='Accent.TButton',
                                          command=self.connect_button_click)
+        self.connected = tk.BooleanVar(False)
         self.connect_button.bind("<Return>", self.handle_enter)
         self.ip_entry.bind("<Return>", self.handle_enter)
         self.connect_button.focus()
@@ -30,25 +33,40 @@ class Connection:
         self.connect_button_click()
 
     def connect_button_click(self):
-        server_ip = self.ip_entry.get()
-        print(server_ip)
-        if server_ip == '':
-            server_ip = 'localhost'
-        try:
-            self.client.connect(server_ip)
-            self.client_io.connect((server_ip, IO_PORT))
-            self.UI_control.handle_accepted_connection()
-            return True
-        except Exception as e:
-            print(e)
-            print(self.client.client)
-            print(self.client_io.client)
-            self.UI_control.handle_failed_connection()
-            return False
+        if not self.connected.get():
+            server_ip = self.ip_entry.get()
+            print(server_ip)
+            if server_ip == '':
+                server_ip = 'localhost'
+            try:
+                self.client.connect(server_ip)
+                self.client_io.connect((server_ip, IO_PORT))
+                self.UI_control.handle_accepted_connection()
+                self.set_connected_state()
+            except Exception as e:
+                print(e)
+                print(self.client.client)
+                print(self.client_io.client)
+                self.UI_control.handle_failed_connection()
+                self.set_disconnected_state()
+        else:
+            self.UI_control.handle_lost_connection(show_error=False)
+            self.set_disconnected_state()
+
+    def set_connected_state(self):
+        self.connect_button.configure(text='Disconnect')
+        self.connected.set(True)
+
+    def set_disconnected_state(self):
+        self.connect_button.configure(text='Connect')
+        self.connected.set(False)
 
     def close(self):
-        self.client.close()
-        self.client_io.close()
+        try:
+            self.client.close()
+            self.client_io.close()
+        except:
+            pass
         self.client = Client(self.UI_control, AF_INET, SOCK_STREAM)
         self.client_io = BaseSocket(AF_INET, SOCK_STREAM)
     
@@ -71,12 +89,4 @@ class Connection:
         )
 
     def handle_lost_connection(self):
-        pass
-
-    def on_button(self):
-        self.connect_button['state'] = 'normal'
-        self.connect_button.configure(text='Connect')
-
-    def off_button(self):
-        self.connect_button['state'] = 'disabled'
-        self.connect_button.configure(text='Connected')
+        self.set_disconnected_state()

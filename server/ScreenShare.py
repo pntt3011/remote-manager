@@ -58,5 +58,7 @@ class ScreenShare:
     def stop_stream(self):
         try:
             self.client_socket.close()
+        except:
+            pass
         finally:
             self.running = False
