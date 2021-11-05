@@ -70,6 +70,8 @@ class ServerSocket(socket.socket):
     def end_transfer(self):
         try:
             self.transfer_send.close()
+        except:
+            pass
         finally:
             print("End transfer")
             self.transfer_send = None

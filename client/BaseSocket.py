@@ -1,4 +1,5 @@
 from struct import pack, unpack
+from sys import exec_prefix
 from tkinter import messagebox
 import tkinter as tk
 from tkinter import ttk
@@ -80,6 +81,8 @@ class BaseSocket(socket.socket):
     def end_transfer(self):
         try:
             self.transfer_send.close()
+        except:
+            pass
         finally:
             print("End transfer")
             self.transfer_send = None
@@ -293,6 +296,7 @@ class BaseSocket(socket.socket):
             try:
                 self.root_tk.wm_attributes("-disabled", False)
                 self.monitor_window.destroy()
-
+            except:
+                pass
             finally:
                 self.monitor_window = None

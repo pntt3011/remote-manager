@@ -216,11 +216,9 @@ class LocalFrame(tk.Frame):
 
                     elif os.path.isfile(path):
                         os.remove(path)
-
         except Exception as e:
             messagebox.showerror(
                 "Error", e)
-
         finally:
             self.open_path()
 

@@ -166,7 +166,8 @@ class ServerIO:
             self.server.accept()
             print("Accepted")
             self.flag = True
-
+        except:
+            pass
         finally:
             while self.flag:
                 s = self.server.receive_obj()
